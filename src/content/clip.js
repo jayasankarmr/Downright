@@ -81,6 +81,30 @@
     return sanitizeFilename(name) + '.md';
   }
 
+  /* What the toast says. Kept beside the other string builders so the
+   * wording lives with the code that measures the clip, not with the code
+   * that paints it.
+   *
+   * A failure reads its line out of the shared catalogue in
+   * common/blocked.js, so the toast, the popup, and the toolbar tooltip
+   * cannot drift into three different accounts of the same refusal. */
+  function describeClip(result, opts, tokens) {
+    if (result.reason) {
+      const info = describeReason(result.reason);
+      return { ok: false, title: info.title, detail: info.detail };
+    }
+    if (opts.download) {
+      return { ok: true, title: 'Saved as Markdown', detail: result.meta.filename };
+    }
+    return {
+      ok: true,
+      title: result.meta.mode === 'selection'
+        ? 'Copied selection as Markdown'
+        : 'Copied as Markdown',
+      detail: '≈' + formatTokens(tokens) + ' tokens · ' + result.meta.chars.toLocaleString() + ' chars',
+    };
+  }
+
   /* ------------------------------------------------------------------ *
    * Selection capture
    * ------------------------------------------------------------------ */
@@ -138,7 +162,7 @@
   }
 
   /* ------------------------------------------------------------------ *
-   * Clipboard, download, toast
+   * Clipboard and download
    * ------------------------------------------------------------------ */
 
   /* The execCommand fallback fires a real `copy` event in the page, and a
@@ -219,10 +243,14 @@
     }
   }
 
-  function announce(ok, title, detail, doc) {
-    const fn = root.__downright && root.__downright.toast;
+  /* Raises the shared toast component and reports whether it actually
+   * landed — show() returns null when the DOM would not have it, and the
+   * background worker needs that answer to decide whether the reason still
+   * has to be delivered somewhere else. */
+  function announce(spec, doc) {
+    const fn = root.__downright && root.__downright.showToast;
     if (typeof fn !== 'function') return false;
-    return fn({ ok, title, detail, document: doc });
+    return !!fn(spec, doc);
   }
 
   function describeReason(code) {
@@ -297,6 +325,10 @@
 
       let out = '';
       const isSelection = mode === 'selection' && hasSelection;
+      /* What was actually captured, which is not always what was asked for:
+       * a selection clip with nothing selected falls through to the article.
+       * The toast reads this, so it has to be the branch that ran. */
+      const capturedMode = isSelection ? 'selection' : (mode === 'full' ? 'full' : 'article');
       if (settings.frontmatter && !isSelection) {
         out += buildFrontmatter(meta, settings);
       } else if (!isSelection && settings.titleHeading && meta.title) {
@@ -323,7 +355,7 @@
           url: meta.url,
           author: meta.author,
           published: meta.published,
-          mode,
+          mode: capturedMode,
           tokens,
           chars: out.length,
           filename: buildFilename(settings.filenameTemplate, meta),
@@ -347,25 +379,11 @@
         }
       }
 
-      const done = opts.download ? result.downloaded : (opts.copy ? result.copied : !result.reason);
-
       /* The toast preference governs the confirmation, not the diagnosis: a
        * failure the reader never sees is the bug this whole path exists to
        * fix, so failures always speak. */
-      if (opts.toast && (done ? settings.toast : true)) {
-        let title;
-        let detail;
-        if (done) {
-          detail = '≈' + formatTokens(tokens) + ' tokens · ' +
-            out.length.toLocaleString() + ' characters';
-          if (opts.download) title = 'Saved ' + result.meta.filename;
-          else title = isSelection ? 'Selection copied as Markdown' : 'Copied as Markdown';
-        } else {
-          const info = describeReason(result.reason);
-          title = info.title;
-          detail = info.detail;
-        }
-        result.toasted = announce(done, title, detail, doc);
+      if (opts.toast && (result.reason ? true : settings.toast)) {
+        result.toasted = announce(describeClip(result, opts, tokens), doc);
       }
       return result;
     } catch (e) {

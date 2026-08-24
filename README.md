@@ -8,11 +8,11 @@ clipboard — ready to paste into ChatGPT, Claude, Obsidian, Notion, or a doc.
 - **Right-click** → *Copy selection as Markdown* / *Copy page as Markdown* / *Save page as .md*.
 - **Toolbar popup**: preview the Markdown before copying, switch Article ↔ Full-page,
   save as a `.md` file, see a token estimate.
-- **You always find out what happened.** Every clip drops a toast at the top of the page —
-  a checkmark and the token count, or a cross and the reason. Sites extensions are not
-  allowed to run on (browser pages, the add-on stores, the PDF viewer, `file:` URLs
-  without file access) say so by name, and where no toast can be drawn at all the popup
-  opens with the explanation instead.
+- **You always find out what happened.** Every clip raises the toast in the top-right
+  corner — the leafcutter hauling the page in with the token count, or a still mark and
+  the reason it couldn't. Sites extensions are not allowed to run on (browser pages, the
+  add-on stores, the PDF viewer, `file:` URLs without file access) say so by name, and
+  where no toast can be drawn at all the popup opens with the explanation instead.
 
 ## Why another Markdown clipper
 
@@ -91,9 +91,11 @@ failure and print the reason code it reports. Serve the repo and open it —
 background.js          thin: context menus, keyboard command, badge, escalation
 common/blocked.js      the reason catalogue: why a clip didn't happen, in one place
 popup/                 preview UI; injects and calls the converter itself
+options/               settings; every switch previews its own effect as a diff
+common/defaults.js     the settings every surface agrees on
+common/toast.js        the in-page confirmation card: the mark, the count, the reason
 content/convert.js     the engine: DOM → GFM (tables, code, math, shadow DOM)
 content/extract.js     Readability-style main-content extraction + metadata
-content/toast.js       the answer at the top of the page: success or reason
 content/clip.js        orchestrator: capture → convert → copy/save/toast
 ```
 

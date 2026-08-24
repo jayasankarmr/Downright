@@ -13,23 +13,21 @@
            border: 1px solid currentColor; background: none; color: inherit; cursor: pointer; }
   pre { max-width: 62ch; background: rgba(128,128,128,.14); padding: 12px;
         border-radius: 8px; overflow: auto; font-size: 13px; }
-  /* A page doing its worst to smother the toast. The host's !important
-     geometry has to beat every one of these. */
-  #downright-toast-host { position: static !important; display: none !important;
-                          opacity: 0 !important; z-index: 1 !important;
-                          visibility: hidden !important; }
+  /* A page doing its worst to smother the toast. The host wins on
+     specificity for everything it declares; `all:initial` on :host keeps the
+     rest of the page's ideas out of the shadow root. */
+  #downright-toast-host { border: 6px dashed red !important; }
 </style>
 
 <h1>Downright feedback preview</h1>
-<p>Manual check for what the reader sees. The toast is the only surface that reports a
-   keyboard or right-click clip, so it has to survive a hostile page: the stylesheet here
-   tries to hide <code>#downright-toast-host</code> six different ways.</p>
+<p>Manual check for what the reader sees: the shared <code>common/toast.js</code>
+   component in every state, top-right, and the reason each clip outcome reports.</p>
 
 <h2>Toast states</h2>
 <p>
-  <button data-ok="1" data-title="Copied as Markdown" data-detail="≈1.4k tokens · 5,612 characters">Success</button>
-  <button data-ok="1" data-title="Selection copied as Markdown" data-detail="≈180 tokens · 712 characters">Success (selection)</button>
-  <button data-ok="1" data-title="Saved tf–idf.md" data-detail="≈4k tokens · 16,204 characters">Success (saved)</button>
+  <button data-ok="1" data-title="Copied as Markdown" data-detail="≈1.4k tokens · 5,612 chars">Success</button>
+  <button data-ok="1" data-title="Copied selection as Markdown" data-detail="≈180 tokens · 712 chars">Success (selection)</button>
+  <button data-ok="1" data-title="Saved as Markdown" data-detail="tf–idf.md">Success (saved)</button>
 </p>
 <p id="reasons"></p>
 
@@ -46,7 +44,7 @@
 
 <script src="../src/common/defaults.js"></script>
 <script src="../src/common/blocked.js"></script>
-<script src="../src/content/toast.js"></script>
+<script src="../src/common/toast.js"></script>
 <script src="../src/content/convert.js"></script>
 <script src="../src/content/extract.js"></script>
 <script src="../src/content/clip.js"></script>
@@ -56,7 +54,7 @@
   const out = document.getElementById('out');
 
   for (const b of document.querySelectorAll('[data-title]')) {
-    b.onclick = () => dr.toast({
+    b.onclick = () => dr.showToast({
       ok: b.dataset.ok === '1', title: b.dataset.title, detail: b.dataset.detail,
     });
   }
@@ -66,7 +64,7 @@
   for (const code of Object.keys(B.REASONS)) {
     const b = document.createElement('button');
     b.textContent = code;
-    b.onclick = () => dr.toast(Object.assign({ ok: false }, B.describe(code)));
+    b.onclick = () => dr.showToast(Object.assign({ ok: false }, B.describe(code)));
     holder.appendChild(b);
   }
 

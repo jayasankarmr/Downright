@@ -8,7 +8,7 @@ const api = globalThis.browser ?? globalThis.chrome;
 const CONTENT_FILES = [
   'common/defaults.js',
   'common/blocked.js',
-  'content/toast.js',
+  'common/toast.js',
   'content/convert.js',
   'content/extract.js',
   'content/clip.js',

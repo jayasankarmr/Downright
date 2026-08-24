@@ -2,37 +2,53 @@
 
 ## Unreleased
 
+Interface:
+
+- **Settings rebuilt.** Sectioned cards with a sticky rail, drawn switches, segmented
+  controls, and a checklist of front-matter fields that each show the YAML line they
+  add. The bullet marker is now exposed as a setting instead of being a default nobody
+  could reach.
+- **Every setting shows its own effect.** Changing a switch pops a preview anchored to
+  the row: a small diff of the Markdown, struck-through red for the lines that go away
+  and green for the ones that arrive. An "Example" affordance on each row opens the
+  same preview on demand. The filename template resolves live under the field, through
+  the same `buildFilename` the download uses.
+- **The confirmation toast is the brand now** — the leafcutter hauls the page in,
+  snips twice, and the three lines of the clip wipe on behind her, over a headline and
+  a monospace count (`≈1.2k tokens · 4,930 chars`) with a bar counting down the
+  dismissal. It lives in `common/toast.js` so the settings preview mounts the real
+  component rather than a drawing of one, and it stills itself when a clip fails.
+- The toast, the previews, and the whole settings page honour
+  `prefers-reduced-motion` and both colour schemes.
+
 Every clip now answers, and says why when it can't:
 
-- **A toast at the top of the page on every invocation.** The keyboard shortcut and the
-  right-click menu used to report only through a 1.8-second badge on the toolbar icon —
-  easy to miss, and it never said anything. Now a card drops in at the top centre of the
-  page with a drawn checkmark and the token count, or a drawn cross and a sentence
-  explaining the failure. It lives in a closed shadow root whose geometry is pinned with
-  `!important`, so a page cannot restyle it out of existence, and it dismisses on click.
 - **Blocked sites are named, not shrugged at.** `common/blocked.js` maps each way a clip
   can fail to a title and an actionable sentence: browser pages and extension pages
   (sealed off from every extension), the Chrome/Edge/Firefox add-on stores, `file:` URLs
   without *Allow access to file URLs*, PDFs in the built-in viewer, pages with no
   readable text, a page whose permissions policy refuses the clipboard, a page that is
   merely unfocused, and a blocked download. The same catalogue feeds the toast, the
-  popup, and the toolbar tooltip, so all three tell one story.
+  popup, and the toolbar tooltip, so all three tell one story. Previously a restricted
+  page produced nothing but a 1.8-second `!` on the toolbar icon.
+- **The failure toast carries the reason.** The still leafcutter now sits beside the
+  sentence explaining what happened, and the card wraps to fit it rather than
+  ellipsizing it away. Success is unchanged: same corner, same size, same hauling ant.
 - **When no toast is possible, the popup says it instead.** On a browser page there is no
   document an extension may draw on, so nothing in the page can ever appear. The reason
   is stashed in session storage and the extension's own popup is opened
   (`action.openPopup()`, Chrome 127+/Firefox 127+), landing under the toolbar icon with
   the explanation already on screen. Older browsers fall back to the badge and tooltip.
-- **Failures always speak.** The "show the Copied toast" preference now governs the
-  confirmation only — a clip that quietly does nothing is worse than one that says why.
+- **Failures always speak.** The confirmation-toast switch now governs the confirmation
+  only — a clip that quietly does nothing is worse than one that says why.
 - **The popup reports its own copy and save failures** in a status bar under the header,
   rather than leaving the button silent, and its error card fills the window so the
   footer stays put.
 - Empty clips are no longer silent successes: a PDF viewer or a page with no readable
   text is reported as such instead of putting an empty document on the clipboard.
-- Entry animations are additive everywhere — every rule states the finished look and
-  animates only the arrival, with the stagger inside the keyframe percentages rather
-  than an `animation-delay` held by a fill mode. Reduced motion, and any timeline that
-  never advances, leaves a fully drawn toast rather than an invisible one.
+- `meta.mode` reports the capture that actually ran. A selection clip with nothing
+  selected falls through to the article, and used to keep calling itself a selection.
+
 
 Conversion fixes, found by clipping dense Wikipedia articles:
 

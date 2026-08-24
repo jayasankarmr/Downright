@@ -22,14 +22,14 @@ const api = globalThis.browser ?? globalThis.chrome;
 const CONTENT_FILES = [
   'common/defaults.js',
   'common/blocked.js',
-  'content/toast.js',
+  'common/toast.js',
   'content/convert.js',
   'content/extract.js',
   'content/clip.js',
 ];
 
 // Enough to put a toast on a page when the clip pipeline never ran.
-const TOAST_FILES = ['content/toast.js'];
+const TOAST_FILES = ['common/toast.js'];
 
 const OK_BADGE = '#2F7A55';
 const FAIL_BADGE = '#B3392E';
@@ -99,7 +99,7 @@ async function injectToast(tabId, ok, info) {
     await api.scripting.executeScript({ target: { tabId }, files: TOAST_FILES });
     const results = await api.scripting.executeScript({
       target: { tabId },
-      func: (o) => globalThis.__downright.toast(o),
+      func: (o) => !!globalThis.__downright.showToast(o),
       args: [{ ok, title: info.title, detail: info.detail }],
     });
     return !!(results && results[0] && results[0].result === true);
