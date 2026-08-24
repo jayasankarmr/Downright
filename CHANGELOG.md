@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+Every clip now answers, and says why when it can't:
+
+- **A toast at the top of the page on every invocation.** The keyboard shortcut and the
+  right-click menu used to report only through a 1.8-second badge on the toolbar icon —
+  easy to miss, and it never said anything. Now a card drops in at the top centre of the
+  page with a drawn checkmark and the token count, or a drawn cross and a sentence
+  explaining the failure. It lives in a closed shadow root whose geometry is pinned with
+  `!important`, so a page cannot restyle it out of existence, and it dismisses on click.
+- **Blocked sites are named, not shrugged at.** `common/blocked.js` maps each way a clip
+  can fail to a title and an actionable sentence: browser pages and extension pages
+  (sealed off from every extension), the Chrome/Edge/Firefox add-on stores, `file:` URLs
+  without *Allow access to file URLs*, PDFs in the built-in viewer, pages with no
+  readable text, a page whose permissions policy refuses the clipboard, a page that is
+  merely unfocused, and a blocked download. The same catalogue feeds the toast, the
+  popup, and the toolbar tooltip, so all three tell one story.
+- **When no toast is possible, the popup says it instead.** On a browser page there is no
+  document an extension may draw on, so nothing in the page can ever appear. The reason
+  is stashed in session storage and the extension's own popup is opened
+  (`action.openPopup()`, Chrome 127+/Firefox 127+), landing under the toolbar icon with
+  the explanation already on screen. Older browsers fall back to the badge and tooltip.
+- **Failures always speak.** The "show the Copied toast" preference now governs the
+  confirmation only — a clip that quietly does nothing is worse than one that says why.
+- **The popup reports its own copy and save failures** in a status bar under the header,
+  rather than leaving the button silent, and its error card fills the window so the
+  footer stays put.
+- Empty clips are no longer silent successes: a PDF viewer or a page with no readable
+  text is reported as such instead of putting an empty document on the clipboard.
+- Entry animations are additive everywhere — every rule states the finished look and
+  animates only the arrival, with the stagger inside the keyframe percentages rather
+  than an `animation-delay` held by a fill mode. Reduced motion, and any timeline that
+  never advances, leaves a fully drawn toast rather than an invisible one.
+
 Conversion fixes, found by clipping dense Wikipedia articles:
 
 - Emphasis nesting: `<i><b>…</b></i>` now yields `***…***` instead of silently

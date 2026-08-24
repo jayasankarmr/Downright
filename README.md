@@ -8,6 +8,11 @@ clipboard — ready to paste into ChatGPT, Claude, Obsidian, Notion, or a doc.
 - **Right-click** → *Copy selection as Markdown* / *Copy page as Markdown* / *Save page as .md*.
 - **Toolbar popup**: preview the Markdown before copying, switch Article ↔ Full-page,
   save as a `.md` file, see a token estimate.
+- **You always find out what happened.** Every clip drops a toast at the top of the page —
+  a checkmark and the token count, or a cross and the reason. Sites extensions are not
+  allowed to run on (browser pages, the add-on stores, the PDF viewer, `file:` URLs
+  without file access) say so by name, and where no toast can be drawn at all the popup
+  opens with the explanation instead.
 
 ## Why another Markdown clipper
 
@@ -74,13 +79,21 @@ page with tabbed code samples, and a Shadow-DOM dashboard — and diffs the outp
 hand-written expected Markdown. `tests/harness.html` shows the same suite interactively
 with side-by-side diffs.
 
+`tests/feedback-preview.html` is the manual counterpart for what the reader sees: every
+toast state and every reason in the catalogue, on a page whose stylesheet tries six ways
+to hide the toast host, plus buttons that drive the real `clip()` pipeline into each
+failure and print the reason code it reports. Serve the repo and open it —
+`python3 -m http.server 8631` then `localhost:8631/tests/feedback-preview.html`.
+
 ### Architecture, briefly
 
 ```
-background.js          thin: context menus, keyboard command, badge
+background.js          thin: context menus, keyboard command, badge, escalation
+common/blocked.js      the reason catalogue: why a clip didn't happen, in one place
 popup/                 preview UI; injects and calls the converter itself
 content/convert.js     the engine: DOM → GFM (tables, code, math, shadow DOM)
 content/extract.js     Readability-style main-content extraction + metadata
+content/toast.js       the answer at the top of the page: success or reason
 content/clip.js        orchestrator: capture → convert → copy/save/toast
 ```
 

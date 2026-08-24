@@ -3,23 +3,36 @@
  * Deliberately minimal: create context menus, react to the keyboard
  * command, inject-and-run on demand. There are no persistent content
  * scripts and no message ports — the classic MV3 "receiving end does not
- * exist" failure mode cannot happen because nothing ever listens. */
+ * exist" failure mode cannot happen because nothing ever listens.
+ *
+ * The one thing it owes the reader is an answer. Every path below ends in
+ * either a success toast on the page or a named reason: in the page when a
+ * script can still be injected there, and in the extension's own popup when
+ * it cannot, because on a browser page there is no other surface left. */
 
 /* global importScripts */
 'use strict';
 
 try {
-  importScripts('common/defaults.js'); // Chromium service worker
-} catch (e) { /* Firefox event page loads it via manifest scripts order */ }
+  importScripts('common/defaults.js', 'common/blocked.js'); // Chromium service worker
+} catch (e) { /* Firefox event page loads them via manifest scripts order */ }
 
 const api = globalThis.browser ?? globalThis.chrome;
 
 const CONTENT_FILES = [
   'common/defaults.js',
+  'common/blocked.js',
+  'content/toast.js',
   'content/convert.js',
   'content/extract.js',
   'content/clip.js',
 ];
+
+// Enough to put a toast on a page when the clip pipeline never ran.
+const TOAST_FILES = ['content/toast.js'];
+
+const OK_BADGE = '#2F7A55';
+const FAIL_BADGE = '#B3392E';
 
 async function getSettings() {
   const defaults = globalThis.DOWNRIGHT_DEFAULTS || {};
@@ -28,6 +41,18 @@ async function getSettings() {
   } catch (e) {
     return Object.assign({}, defaults);
   }
+}
+
+function describe(code) {
+  const b = globalThis.DOWNRIGHT_BLOCKED;
+  if (b && typeof b.describe === 'function') return b.describe(code);
+  return { code: code || 'unknown', title: 'Downright couldn’t clip this page', detail: '' };
+}
+
+function classify(url) {
+  const b = globalThis.DOWNRIGHT_BLOCKED;
+  if (b && typeof b.classifyUrl === 'function') return b.classifyUrl(url);
+  return null;
 }
 
 async function runClip(tabId, opts) {
@@ -40,38 +65,113 @@ async function runClip(tabId, opts) {
   return results && results[0] ? results[0].result : null;
 }
 
+/* ------------------------------------------------------------------ *
+ * Telling the reader what happened
+ * ------------------------------------------------------------------ */
+
 function flashBadge(tabId, ok) {
+  if (tabId == null) return;
   try {
     api.action.setBadgeText({ tabId, text: ok ? '✓' : '!' });
-    api.action.setBadgeBackgroundColor({ tabId, color: ok ? '#10b981' : '#ef4444' });
+    api.action.setBadgeBackgroundColor({ tabId, color: ok ? OK_BADGE : FAIL_BADGE });
     setTimeout(() => {
       try { api.action.setBadgeText({ tabId, text: '' }); } catch (e) { /* tab gone */ }
-    }, 1800);
+    }, ok ? 1800 : 4000);
   } catch (e) { /* badge is best-effort */ }
 }
 
-async function clipToClipboard(tab, mode) {
-  if (!tab || tab.id == null) return;
+/* Park the reason on the toolbar tooltip for as long as the badge shows it,
+ * then hand the tooltip back exactly as it was. */
+async function flashTitle(tabId, title, ms) {
+  if (tabId == null) return;
+  let previous = '';
+  try { previous = await api.action.getTitle({ tabId }); } catch (e) { return; }
+  try { api.action.setTitle({ tabId, title }); } catch (e) { return; }
+  setTimeout(() => {
+    try { api.action.setTitle({ tabId, title: previous }); } catch (e) { /* tab gone */ }
+  }, ms);
+}
+
+/* Returns true only if the toast is genuinely on the page. */
+async function injectToast(tabId, ok, info) {
+  if (tabId == null) return false;
   try {
-    const settings = await getSettings();
-    const res = await runClip(tab.id, { mode, settings, copy: true, toast: true });
-    flashBadge(tab.id, !!(res && res.ok && res.copied));
+    await api.scripting.executeScript({ target: { tabId }, files: TOAST_FILES });
+    const results = await api.scripting.executeScript({
+      target: { tabId },
+      func: (o) => globalThis.__downright.toast(o),
+      args: [{ ok, title: info.title, detail: info.detail }],
+    });
+    return !!(results && results[0] && results[0].result === true);
   } catch (e) {
-    // Restricted page (browser UI, store, PDF viewer…): signal via badge.
-    flashBadge(tab.id, false);
+    return false;
   }
 }
 
-async function clipToFile(tab, mode) {
-  if (!tab || tab.id == null) return;
+/* Last resort. On a browser page, the store, or another extension's page
+ * there is no document we are allowed to draw on — no toast can exist. The
+ * extension's own popup is the only surface the browser still lets us put in
+ * front of the reader, and it opens anchored under the toolbar icon at the
+ * top of the window. Stash the reason first so it opens explaining itself
+ * rather than failing a second time in silence. */
+async function escalateToPopup(tabId, code) {
+  try {
+    await api.storage.session.set({
+      lastBlock: { tabId: tabId == null ? -1 : tabId, code, at: Date.now() },
+    });
+  } catch (e) { /* session storage is best-effort */ }
+  try {
+    if (api.action && typeof api.action.openPopup === 'function') await api.action.openPopup();
+  } catch (e) { /* Chrome < 127, Firefox < 127, or no focused window */ }
+}
+
+/* One failure, told once, on the best surface available. */
+async function reportFailure(tabId, code, alreadyToasted) {
+  const info = describe(code);
+  flashBadge(tabId, false);
+  flashTitle(tabId, 'Downright — ' + info.title, 4000);
+  if (alreadyToasted) return;
+  const shown = await injectToast(tabId, false, info);
+  if (!shown) await escalateToPopup(tabId, code);
+}
+
+/* ------------------------------------------------------------------ *
+ * The two things the extension does
+ * ------------------------------------------------------------------ */
+
+async function clipTo(tab, mode, action) {
+  const tabId = tab && tab.id != null ? tab.id : null;
+  if (tabId == null) {
+    await reportFailure(null, 'no-tab', false);
+    return;
+  }
+  let res = null;
   try {
     const settings = await getSettings();
-    const res = await runClip(tab.id, { mode, settings, download: true, toast: true });
-    flashBadge(tab.id, !!(res && res.ok && res.downloaded));
+    const opts = { mode, settings, toast: true };
+    opts[action] = true;
+    res = await runClip(tabId, opts);
   } catch (e) {
-    flashBadge(tab.id, false);
+    // Restricted page (browser UI, store, PDF viewer, a file: URL without
+    // file access…): the URL usually says which.
+    await reportFailure(tabId, classify(tab.url) || 'injection-blocked', false);
+    return;
   }
+  if (!res || !res.ok) {
+    await reportFailure(tabId, 'convert-failed', false);
+    return;
+  }
+  if (action === 'copy' ? res.copied : res.downloaded) {
+    flashBadge(tabId, true);
+    return;
+  }
+  // The content script reached the page, so it has already toasted the
+  // reason itself — unless drawing the toast is what failed.
+  await reportFailure(tabId, res.reason || 'convert-failed', res.toasted);
 }
+
+const clipToClipboard = (tab, mode) => clipTo(tab, mode, 'copy');
+const clipToFile = (tab, mode) => clipTo(tab, mode, 'download');
 
 /* ------------------------------------------------------------------ *
  * Install: context menus + welcome page

@@ -177,16 +177,25 @@
     }
   }
 
+  /* Returns { ok, reason }. A bare false told the toast nothing, and "could
+   * not copy" is about the least useful thing a clipper can say. The two
+   * failures worth telling apart are a page that forbids clipboard writes
+   * outright and one that simply is not focused — only the second is the
+   * reader's to fix. */
   async function copyText(text, doc) {
+    let reason = 'clipboard-blocked';
     try {
       await navigator.clipboard.writeText(text);
-      return true;
-    } catch (e) { /* fall through */ }
-    try {
-      return legacyCopy(text, doc);
+      return { ok: true, reason: null };
     } catch (e) {
-      return false;
+      try {
+        if (doc.hasFocus && !doc.hasFocus()) reason = 'page-not-focused';
+      } catch (err) { /* ignore */ }
     }
+    try {
+      if (legacyCopy(text, doc)) return { ok: true, reason: null };
+    } catch (e) { /* fall through */ }
+    return { ok: false, reason };
   }
 
   /* The anchor is deliberately never appended to the page. Attached, its
@@ -210,37 +219,30 @@
     }
   }
 
-  function showToast(message, ok, doc) {
+  function announce(ok, title, detail, doc) {
+    const fn = root.__downright && root.__downright.toast;
+    if (typeof fn !== 'function') return false;
+    return fn({ ok, title, detail, document: doc });
+  }
+
+  function describeReason(code) {
+    const b = root.DOWNRIGHT_BLOCKED;
+    if (b && typeof b.describe === 'function') return b.describe(code);
+    return { code, title: 'Downright couldn’t clip this page', detail: '' };
+  }
+
+  /* Chrome hands a PDF to a built-in viewer and leaves the tab's document a
+   * near-empty <embed> shell. Injection succeeds, so nothing throws — the
+   * clip just comes back blank. Name it instead of shrugging. */
+  function isPdfDocument(doc) {
     try {
-      const prev = doc.getElementById('downright-toast-host');
-      if (prev) prev.remove();
-      const host = doc.createElement('div');
-      host.id = 'downright-toast-host';
-      host.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;';
-      const shadow = host.attachShadow({ mode: 'closed' });
-      const dark = root.matchMedia && root.matchMedia('(prefers-color-scheme: dark)').matches;
-      const style = doc.createElement('style');
-      style.textContent =
-        '.t{font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;' +
-        'display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;' +
-        'box-shadow:0 4px 24px rgba(0,0,0,.18);max-width:320px;' +
-        (dark ? 'background:#1e293b;color:#e2e8f0;border:1px solid #334155;'
-              : 'background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;') +
-        'animation:in .18s ease-out;}' +
-        '.d{width:8px;height:8px;border-radius:50%;flex:none;background:' + (ok ? '#10b981' : '#ef4444') + ';}' +
-        '@keyframes in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}' +
-        '@media (prefers-reduced-motion: reduce){.t{animation:none}}';
-      const box = doc.createElement('div');
-      box.className = 't';
-      const dot = doc.createElement('span');
-      dot.className = 'd';
-      const text = doc.createElement('span');
-      text.textContent = message;
-      box.append(dot, text);
-      shadow.append(style, box);
-      doc.documentElement.appendChild(host);
-      setTimeout(() => host.remove(), 2400);
-    } catch (e) { /* toast is best-effort */ }
+      if (/pdf/i.test(doc.contentType || '')) return true;
+      const first = doc.body && doc.body.firstElementChild;
+      return !!(first && first.localName === 'embed' &&
+        /pdf/i.test(first.getAttribute('type') || ''));
+    } catch (e) {
+      return false;
+    }
   }
 
   /* ------------------------------------------------------------------ *
@@ -314,6 +316,8 @@
         warnings,
         copied: false,
         downloaded: false,
+        reason: null,
+        toasted: false,
         meta: {
           title: meta.title,
           url: meta.url,
@@ -326,19 +330,42 @@
         },
       };
 
-      if (opts.copy) result.copied = await copyText(out, doc);
-      if (opts.download) result.downloaded = triggerDownload(out, result.meta.filename, doc);
+      // Nothing came back? Say so, rather than putting an empty clip on the
+      // clipboard and reporting success.
+      if (isPdfDocument(doc)) result.reason = 'pdf-viewer';
+      else if (!bodyMd.trim()) result.reason = 'empty-page';
 
-      if (opts.toast && settings.toast) {
-        let msg;
-        if (opts.download) {
-          msg = result.downloaded ? 'Saved ' + result.meta.filename : 'Could not save the file';
-        } else {
-          msg = result.copied
-            ? 'Copied as Markdown · ≈' + formatTokens(tokens) + ' tokens'
-            : 'Could not copy — open the Downright popup';
+      if (!result.reason) {
+        if (opts.copy) {
+          const copied = await copyText(out, doc);
+          result.copied = copied.ok;
+          if (!copied.ok) result.reason = copied.reason;
         }
-        showToast(msg, opts.download ? result.downloaded : result.copied, doc);
+        if (opts.download) {
+          result.downloaded = triggerDownload(out, result.meta.filename, doc);
+          if (!result.downloaded) result.reason = 'download-blocked';
+        }
+      }
+
+      const done = opts.download ? result.downloaded : (opts.copy ? result.copied : !result.reason);
+
+      /* The toast preference governs the confirmation, not the diagnosis: a
+       * failure the reader never sees is the bug this whole path exists to
+       * fix, so failures always speak. */
+      if (opts.toast && (done ? settings.toast : true)) {
+        let title;
+        let detail;
+        if (done) {
+          detail = '≈' + formatTokens(tokens) + ' tokens · ' +
+            out.length.toLocaleString() + ' characters';
+          if (opts.download) title = 'Saved ' + result.meta.filename;
+          else title = isSelection ? 'Selection copied as Markdown' : 'Copied as Markdown';
+        } else {
+          const info = describeReason(result.reason);
+          title = info.title;
+          detail = info.detail;
+        }
+        result.toasted = announce(done, title, detail, doc);
       }
       return result;
     } catch (e) {

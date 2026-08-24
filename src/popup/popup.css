@@ -7,6 +7,8 @@
   --accent: #2D5DAE;
   --accent-text: #F4EFE6;
   --ok: #C1622F;
+  --good: #2F7A55;
+  --bad: #B3392E;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -18,6 +20,8 @@
     --accent: #6E92D8;
     --accent-text: #17140F;
     --ok: #DA8A5C;
+    --good: #56B889;
+    --bad: #E4776A;
   }
 }
 
@@ -92,9 +96,81 @@ header {
   text-decoration: underline;
 }
 
-.error { padding: 24px 16px 8px; text-align: center; }
+/* The same drawn mark as the in-page toast: two bars growing from their
+ * joint, so a blocked page looks the same wherever the reader meets it.
+ * Every rule states the finished mark and animates only the arrival — no
+ * fill-mode is holding an invisible first frame, and the stagger lives in
+ * the keyframe percentages, so a frozen timeline still leaves a drawn mark. */
+.mark {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  opacity: 1;
+  animation: mark-pop .34s cubic-bezier(.2, 1.35, .4, 1);
+}
+.mark.big { width: 26px; height: 26px; margin-bottom: 10px; }
+.mark.ok { background: var(--good); }
+.mark.no { background: var(--bad); }
+.mark i {
+  position: absolute;
+  display: block;
+  width: 2px;
+  background: #fff;
+  border-radius: 2px;
+  left: 50%;
+  top: 22.7%;
+  height: 54.6%;
+  margin-left: -1px;
+  transform-origin: 50% 50%;
+}
+.mark.no i:nth-child(1) { transform: rotate(45deg); animation: mark-x1 .5s cubic-bezier(.2, 1.2, .4, 1); }
+.mark.no i:nth-child(2) { transform: rotate(-45deg); animation: mark-x2 .5s cubic-bezier(.2, 1.2, .4, 1); }
+.mark.ok i:nth-child(1) {
+  left: 27%; top: 45%; height: 23%; margin-left: 0;
+  transform-origin: 50% 100%; transform: rotate(-45deg);
+  animation: mark-s1 .5s ease-out;
+}
+.mark.ok i:nth-child(2) {
+  left: 27%; top: 22%; height: 46%; margin-left: 0;
+  transform-origin: 50% 100%; transform: rotate(45deg);
+  animation: mark-s2 .5s ease-out;
+}
+@keyframes mark-pop { from { opacity: 0; transform: scale(.2); } }
+@keyframes mark-x1 { 0%, 22% { transform: rotate(45deg) scaleY(0); } 58%, 100% { transform: rotate(45deg) scaleY(1); } }
+@keyframes mark-x2 { 0%, 50% { transform: rotate(-45deg) scaleY(0); } 86%, 100% { transform: rotate(-45deg) scaleY(1); } }
+@keyframes mark-s1 { 0%, 30% { transform: rotate(-45deg) scaleY(0); } 62%, 100% { transform: rotate(-45deg) scaleY(1); } }
+@keyframes mark-s2 { 0%, 55% { transform: rotate(45deg) scaleY(0); } 100% { transform: rotate(45deg) scaleY(1); } }
+
+/* Drops in under the header the way the page toast drops in under the
+ * browser chrome — the popup should never fail silently either. */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  opacity: 1;
+  animation: status-in .3s cubic-bezier(.16, 1, .3, 1);
+}
+/* An author `display` beats the UA rule behind the hidden attribute, so the
+ * bar needs to opt back out of it explicitly. */
+.status[hidden] { display: none; }
+@keyframes status-in { from { opacity: 0; transform: translateY(-8px); } }
+
+/* Takes the space the hidden preview gave up, so the footer stays pinned to
+ * the bottom of the popup instead of floating halfway up an empty window. */
+.error { flex: 1; padding: 30px 18px 8px; text-align: center; }
 .error p { margin: 0 0 6px; font-weight: 600; }
-.error .error-sub { font-weight: 400; color: var(--muted); font-size: 12px; }
+.error .error-sub { font-weight: 400; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mark, .mark i, .status { animation: none; }
+}
 
 #preview {
   flex: 1;
