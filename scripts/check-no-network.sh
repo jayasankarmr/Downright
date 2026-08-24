@@ -28,17 +28,15 @@ for p in "${PATTERNS[@]}"; do
 done
 
 # Regex patterns, for the ways a request sneaks in without the word "fetch":
-# a constructed Image or media element, a dynamic import, a beacon, a popup,
-# or any absolute URL sitting in a string literal waiting to be assigned to
-# a .src. Comments and regex literals do not use quoted "http…", so this
-# stays quiet on prose about URLs.
+# a constructed Image or media element, a dynamic import, a beacon, a popup.
+# Absolute URL literals — the ones waiting to be assigned to a .src — get
+# their own pass below, because two narrow shapes of them are legitimate.
 REGEXES=(
   'fetch[[:space:]]*\('
   'new[[:space:]]+(Image|Audio|EventSource|WebSocket|XMLHttpRequest|RTCPeerConnection)'
   '(^|[^A-Za-z_.$])import[[:space:]]*\('
   'navigator\.(sendBeacon|serviceWorker|connection)'
   'window\.open[[:space:]]*\('
-  '["'"'"'`](https?:)?//'
 )
 
 for p in "${REGEXES[@]}"; do
@@ -47,6 +45,26 @@ for p in "${REGEXES[@]}"; do
     FAIL=1
   fi
 done
+
+# Absolute URLs in string literals get their own pass, because exactly two
+# kinds of them are inert and everything else is not:
+#
+#   1. The SVG namespace. A parser identifier, never fetched. Allowed on
+#      that one declaration line in common/toast.js and nowhere else.
+#   2. RFC 2606 reserved example.org / example.com URLs inside the settings
+#      page previews. They are sample text drawn into a preview pane; the
+#      constructs that could load them are all caught above.
+#
+# Both allowances are pinned to a file and a shape, so a real URL cannot
+# ride in behind them.
+ALLOW_SVG_NS="^[^:]*src/common/toast\.js:[0-9]+:  const SVG_NS = 'http://www\.w3\.org/2000/svg';$"
+ALLOW_SAMPLE="^[^:]*src/options/[^:]*\.js:[0-9]+:[^\"'\`]*['\"\`]https://example\.(org|com)/[^\"'\`]*['\"\`],?$"
+
+if grep -rnE --include='*.js' '["'"'"'`](https?:)?//' "$ROOT/src" "$ROOT/firefox" 2>/dev/null |
+   grep -vE "$ALLOW_SVG_NS" | grep -vE "$ALLOW_SAMPLE"; then
+  echo "✗ absolute URL literal found in shipped code" >&2
+  FAIL=1
+fi
 
 # Extension pages legitimately carry <link rel=stylesheet>, <img src>, and
 # <script src> — but every one of them must be a package-relative path, never

@@ -1,91 +1,328 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>Downright settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
+
+<!-- Drawn once, referenced everywhere: the leafcutter mark and the tick. -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-mark" viewBox="0 0 100 100">
+    <g transform="rotate(-13 55 27)">
+      <rect x="24" y="4" width="62" height="44" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+      <rect x="32" y="13" width="26" height="3.8" fill="#17140F"/>
+      <rect x="32" y="23" width="46" height="3.8" fill="#2D5DAE"/>
+      <rect x="32" y="33" width="34" height="3.8" fill="#17140F"/>
+    </g>
+    <path d="M60 58 L54 45 M72 57 L79 45" stroke="#17140F" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+    <path d="M36 84 L26 95 M48 82 L46 97 M58 80 L68 94" stroke="#17140F" stroke-width="4.4" stroke-linecap="round" fill="none"/>
+    <ellipse cx="24" cy="76" rx="16" ry="12.5" transform="rotate(-8 24 76)" fill="#17140F"/>
+    <ellipse cx="38" cy="75" rx="5.5" ry="4.5" fill="#17140F"/>
+    <ellipse cx="50" cy="72" rx="11" ry="9.5" fill="#17140F"/>
+    <path d="M77 62 L88 66 L77 71 Z" fill="#17140F"/>
+    <circle cx="68" cy="67" r="10.5" fill="#17140F"/>
+    <circle cx="71" cy="63.5" r="3" fill="#F4EFE6"/>
+  </symbol>
+  <symbol id="i-tick" viewBox="0 0 14 14">
+    <path d="M2.4 7.3 L5.5 10.4 L11.6 3.6" fill="none" stroke="currentColor"
+          stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-eye" viewBox="0 0 16 16">
+    <path d="M1.4 8s2.5-4.3 6.6-4.3S14.6 8 14.6 8s-2.5 4.3-6.6 4.3S1.4 8 1.4 8Z"
+          fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    <circle cx="8" cy="8" r="1.9" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <span class="mark"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-mark"/></svg></span>
+    <span class="wordmark">
+      <b>Downright</b>
+      <i>Settings</i>
+    </span>
+    <span id="saved" class="saved" role="status" aria-live="polite" hidden>
+      <svg class="ico" aria-hidden="true"><use href="#i-tick"/></svg>Saved
+    </span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <nav class="rail" aria-label="Settings sections">
+    <a href="#capture">Capture</a>
+    <a href="#formatting">Formatting</a>
+    <a href="#front-matter">Front matter</a>
+    <a href="#files">Files</a>
+    <a href="#shortcut">Shortcut</a>
+    <a href="#privacy">Privacy</a>
+    <p class="rail-note">Changes save as you make them.</p>
+  </nav>
+
   <main>
-    <header>
-      <img src="../icons/icon-48.png" alt="" width="28" height="28">
-      <h1>Downright settings</h1>
-      <span id="saved" class="saved" hidden>Saved ✓</span>
-    </header>
 
-    <section>
-      <h2>Capture</h2>
-      <label class="row">
-        <span>Default mode</span>
-        <select id="mode">
-          <option value="article">Article — main content only</option>
-          <option value="full">Full page — everything</option>
-        </select>
-      </label>
-      <p class="hint">Selecting text first always clips just the selection, whatever the mode.</p>
-      <label class="row check">
-        <input type="checkbox" id="images">
-        <span>Include images (<code>![alt](url)</code>) — untick to keep alt text only</span>
-      </label>
-      <label class="row check">
-        <input type="checkbox" id="toast">
-        <span>Show the “Copied” toast on the page after keyboard or right-click clips</span>
-      </label>
-    </section>
-
-    <section>
-      <h2>Front matter</h2>
-      <label class="row check">
-        <input type="checkbox" id="frontmatter">
-        <span>Start every clip with a YAML front matter block</span>
-      </label>
-      <div id="fm-fields" class="indent">
-        <label class="row check"><input type="checkbox" id="fmTitle"><span>Title</span></label>
-        <label class="row check"><input type="checkbox" id="fmSource"><span>Source URL</span></label>
-        <label class="row check"><input type="checkbox" id="fmAuthor"><span>Author</span></label>
-        <label class="row check"><input type="checkbox" id="fmPublished"><span>Published date</span></label>
-        <label class="row check"><input type="checkbox" id="fmDescription"><span>Description</span></label>
-        <label class="row check"><input type="checkbox" id="fmClipped"><span>Clipped date</span></label>
+    <!-- ---------------------------------------------------------------- -->
+    <section id="capture" class="card">
+      <div class="card-head">
+        <h2>Capture</h2>
+        <p>What Downright takes off the page, and what it tells you afterwards.</p>
       </div>
-      <label class="row check">
-        <input type="checkbox" id="titleHeading">
-        <span>When front matter is off, put the page title as a <code># heading</code> instead</span>
-      </label>
+
+      <div class="row" data-row="mode">
+        <div class="row-text">
+          <span class="row-label" id="mode-label">Default mode</span>
+          <p class="row-desc">
+            Article strips navigation, sidebars, and footers. Full page converts
+            everything the browser rendered.
+          </p>
+        </div>
+        <button type="button" class="peek-btn" data-peek="mode">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Example
+        </button>
+        <div class="segmented" role="radiogroup" aria-labelledby="mode-label">
+          <label><input type="radio" name="mode" value="article"><span>Article</span></label>
+          <label><input type="radio" name="mode" value="full"><span>Full page</span></label>
+        </div>
+      </div>
+
+      <p class="aside">Selecting text first always clips just the selection, whichever mode is set.</p>
+
+      <div class="row" data-row="toast">
+        <div class="row-text">
+          <label class="row-label" for="toast">Confirmation toast</label>
+          <p class="row-desc">
+            A small card in the corner of the page after a keyboard or right-click
+            clip, with the token count.
+          </p>
+        </div>
+        <button type="button" class="peek-btn" data-peek="toast">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Example
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="toast" role="switch">
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </div>
     </section>
 
-    <section>
-      <h2>Files</h2>
-      <label class="row">
-        <span>Download filename</span>
-        <input type="text" id="filenameTemplate" spellcheck="false">
-      </label>
-      <p class="hint">Placeholders: <code>{title}</code> <code>{date}</code> <code>{domain}</code> — “.md” is added automatically.</p>
+    <!-- ---------------------------------------------------------------- -->
+    <section id="formatting" class="card">
+      <div class="card-head">
+        <h2>Formatting</h2>
+        <p>How the Markdown itself is written.</p>
+      </div>
+
+      <div class="row" data-row="images">
+        <div class="row-text">
+          <label class="row-label" for="images">Keep images</label>
+          <p class="row-desc">
+            Emit <code>![alt](url)</code> with an absolute URL. Off, only the alt
+            text survives — smaller clips, fewer dead links.
+          </p>
+        </div>
+        <button type="button" class="peek-btn" data-peek="images">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Example
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="images" role="switch">
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="row" data-row="bullet">
+        <div class="row-text">
+          <span class="row-label" id="bullet-label">Bullet marker</span>
+          <p class="row-desc">The character that starts every unordered list item.</p>
+        </div>
+        <button type="button" class="peek-btn" data-peek="bullet">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Example
+        </button>
+        <div class="segmented mono" role="radiogroup" aria-labelledby="bullet-label">
+          <label><input type="radio" name="bullet" value="-"><span>-</span></label>
+          <label><input type="radio" name="bullet" value="*"><span>*</span></label>
+          <label><input type="radio" name="bullet" value="+"><span>+</span></label>
+        </div>
+      </div>
     </section>
 
-    <section>
-      <h2>Keyboard shortcut</h2>
-      <p class="hint">
-        Copy page as Markdown: <kbd>Alt</kbd>+<kbd>M</kbd> by default (<kbd>Option</kbd>+<kbd>M</kbd> on Mac).
-        Change it under <code>chrome://extensions/shortcuts</code> (Chrome/Edge) or
-        Add-ons Manager → gear → “Manage Extension Shortcuts” (Firefox).
+    <!-- ---------------------------------------------------------------- -->
+    <section id="front-matter" class="card">
+      <div class="card-head">
+        <h2>Front matter</h2>
+        <p>The YAML block Obsidian, Quartz, and most static site generators read.</p>
+      </div>
+
+      <div class="row" data-row="frontmatter">
+        <div class="row-text">
+          <label class="row-label" for="frontmatter">Front matter block</label>
+          <p class="row-desc">Start every clip with <code>---</code> and the fields you pick below.</p>
+        </div>
+        <button type="button" class="peek-btn" data-peek="frontmatter">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Example
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="frontmatter" role="switch">
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="subhead">
+        <span>Fields</span>
+        <span class="subhead-note" id="fm-count"></span>
+      </div>
+
+      <div id="fm-fields" class="fields">
+        <label class="field">
+          <input type="checkbox" id="fmTitle">
+          <span class="tick"><svg aria-hidden="true"><use href="#i-tick"/></svg></span>
+          <span class="field-text"><b>Title</b><code>title: "Leafcutter ants farm fungus"</code></span>
+        </label>
+        <label class="field">
+          <input type="checkbox" id="fmSource">
+          <span class="tick"><svg aria-hidden="true"><use href="#i-tick"/></svg></span>
+          <span class="field-text"><b>Source URL</b><code>source: "https://example.org/…"</code></span>
+        </label>
+        <label class="field">
+          <input type="checkbox" id="fmAuthor">
+          <span class="tick"><svg aria-hidden="true"><use href="#i-tick"/></svg></span>
+          <span class="field-text"><b>Author</b><code>author: "R. Sánchez"</code></span>
+        </label>
+        <label class="field">
+          <input type="checkbox" id="fmPublished">
+          <span class="tick"><svg aria-hidden="true"><use href="#i-tick"/></svg></span>
+          <span class="field-text"><b>Published</b><code>published: 2024-11-02</code></span>
+        </label>
+        <label class="field">
+          <input type="checkbox" id="fmDescription">
+          <span class="tick"><svg aria-hidden="true"><use href="#i-tick"/></svg></span>
+          <span class="field-text"><b>Description</b><code>description: "Leaf clippings, …"</code></span>
+        </label>
+        <label class="field">
+          <input type="checkbox" id="fmClipped">
+          <span class="tick"><svg aria-hidden="true"><use href="#i-tick"/></svg></span>
+          <span class="field-text"><b>Clipped</b><code id="fm-clipped-eg">clipped: today</code></span>
+        </label>
+      </div>
+
+      <div class="row" data-row="titleHeading">
+        <div class="row-text">
+          <label class="row-label" for="titleHeading">
+            Title as a heading
+            <span id="th-tag" class="tag" hidden>in effect</span>
+          </label>
+          <p class="row-desc">
+            The fallback when front matter is off: put the page title on a
+            <code># heading</code> line instead, unless the page already opens with it.
+          </p>
+        </div>
+        <button type="button" class="peek-btn" data-peek="titleHeading">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Example
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="titleHeading" role="switch">
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------- -->
+    <section id="files" class="card">
+      <div class="card-head">
+        <h2>Files</h2>
+        <p>Naming for <b>Save page as Markdown</b> downloads.</p>
+      </div>
+
+      <div class="row stack" data-row="filenameTemplate">
+        <div class="row-text">
+          <label class="row-label" for="filenameTemplate">Download filename</label>
+          <p class="row-desc">Click a placeholder to insert it. <code>.md</code> is added for you.</p>
+        </div>
+        <div class="field-stack">
+          <input type="text" id="filenameTemplate" spellcheck="false" autocomplete="off"
+                 aria-describedby="filename-out">
+          <div class="chips">
+            <button type="button" class="chip" data-insert="{title}">{title}</button>
+            <button type="button" class="chip" data-insert="{date}">{date}</button>
+            <button type="button" class="chip" data-insert="{domain}">{domain}</button>
+          </div>
+          <p class="resolved" id="filename-out">
+            <span class="resolved-key">saves as</span>
+            <span class="resolved-val" id="filename-preview"></span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------- -->
+    <section id="shortcut" class="card">
+      <div class="card-head">
+        <h2>Keyboard shortcut</h2>
+        <p>Downright is built around one keystroke.</p>
+      </div>
+
+      <div class="row" data-row="shortcut">
+        <div class="row-text">
+          <span class="row-label">Copy page as Markdown</span>
+          <p class="row-desc">Works on any page the browser lets extensions read.</p>
+        </div>
+        <span class="keys" id="shortcut-keys"><kbd>Alt</kbd><kbd>M</kbd></span>
+      </div>
+
+      <p class="aside" id="shortcut-help">
+        Rebind it in <code>chrome://extensions/shortcuts</code> (Chrome and Edge), or in the
+        Firefox Add-ons Manager under the gear menu → “Manage Extension Shortcuts”.
+      </p>
+      <div class="actions">
+        <button type="button" class="btn" id="open-shortcuts">Open shortcut settings</button>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------- -->
+    <section id="privacy" class="card accent">
+      <div class="card-head">
+        <h2>Privacy</h2>
+        <p>The short version, which is also the whole version.</p>
+      </div>
+      <p class="prose">
+        Downright makes <b>no network requests</b>. Not for fonts, not for analytics,
+        not for updates to anything but the browser’s own extension update check.
+        Nothing you clip leaves this browser. Settings ride along with your browser
+        profile sync and nowhere else.
+      </p>
+      <p class="prose">
+        That claim is checked mechanically on every commit, and the
+        <a id="repo-link" href="https://github.com/jayasankarmr/Downright" target="_blank" rel="noreferrer">source
+        is public</a> if you would rather check it yourself.
       </p>
     </section>
 
-    <section>
-      <h2>Privacy</h2>
-      <p class="hint">
-        Downright makes <strong>no network requests</strong> — nothing you clip ever leaves this browser.
-        Settings sync through your browser profile. That is the whole story, and the
-        <a id="repo-link" href="https://github.com/jayasankarmr/Downright" target="_blank" rel="noreferrer">source code</a> is public so you can check.
-      </p>
-    </section>
-
-    <footer>
-      <button id="reset" class="btn">Restore defaults</button>
+    <footer class="footer">
+      <p>Downright <span id="version" class="ver"></span></p>
+      <button type="button" class="btn danger" id="reset">Restore defaults</button>
     </footer>
-  </main>
 
-  <script src="../common/defaults.js"></script>
-  <script src="options.js"></script>
+  </main>
+</div>
+
+<!-- The live example. Moved and filled by options.js, one at a time. -->
+<div id="peek" class="peek" role="status" aria-live="polite" hidden>
+  <span class="peek-arrow"></span>
+  <div class="peek-head">
+    <span class="peek-title" id="peek-title"></span>
+    <span class="peek-state" id="peek-state"></span>
+  </div>
+  <div class="peek-body" id="peek-body"></div>
+</div>
+
+<script src="../common/defaults.js"></script>
+<script src="../common/toast.js"></script>
+<!-- For buildFilename(): the preview names the file the same way the
+     download does, rather than approximating it. -->
+<script src="../content/clip.js"></script>
+<script src="options.js"></script>
 </body>
 </html>

@@ -81,6 +81,31 @@
     return sanitizeFilename(name) + '.md';
   }
 
+  /* What the toast says. Kept beside the other string builders so the
+   * wording lives with the code that measures the clip, not with the code
+   * that paints it. */
+  function describeClip(result, opts, tokens) {
+    if (opts.download) {
+      return result.downloaded
+        ? { ok: true, title: 'Saved as Markdown', detail: result.meta.filename }
+        : { ok: false, title: 'Could not save the file', detail: 'Try the Downright popup' };
+    }
+    if (!result.copied) {
+      return {
+        ok: false,
+        title: 'Could not reach the clipboard',
+        detail: 'Open the Downright popup to copy',
+      };
+    }
+    return {
+      ok: true,
+      title: result.meta.mode === 'selection'
+        ? 'Copied selection as Markdown'
+        : 'Copied as Markdown',
+      detail: '≈' + formatTokens(tokens) + ' tokens · ' + result.meta.chars.toLocaleString() + ' chars',
+    };
+  }
+
   /* ------------------------------------------------------------------ *
    * Selection capture
    * ------------------------------------------------------------------ */
@@ -138,7 +163,7 @@
   }
 
   /* ------------------------------------------------------------------ *
-   * Clipboard, download, toast
+   * Clipboard and download
    * ------------------------------------------------------------------ */
 
   /* The execCommand fallback fires a real `copy` event in the page, and a
@@ -208,39 +233,6 @@
     } catch (e) {
       return false;
     }
-  }
-
-  function showToast(message, ok, doc) {
-    try {
-      const prev = doc.getElementById('downright-toast-host');
-      if (prev) prev.remove();
-      const host = doc.createElement('div');
-      host.id = 'downright-toast-host';
-      host.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;';
-      const shadow = host.attachShadow({ mode: 'closed' });
-      const dark = root.matchMedia && root.matchMedia('(prefers-color-scheme: dark)').matches;
-      const style = doc.createElement('style');
-      style.textContent =
-        '.t{font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;' +
-        'display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;' +
-        'box-shadow:0 4px 24px rgba(0,0,0,.18);max-width:320px;' +
-        (dark ? 'background:#1e293b;color:#e2e8f0;border:1px solid #334155;'
-              : 'background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;') +
-        'animation:in .18s ease-out;}' +
-        '.d{width:8px;height:8px;border-radius:50%;flex:none;background:' + (ok ? '#10b981' : '#ef4444') + ';}' +
-        '@keyframes in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}' +
-        '@media (prefers-reduced-motion: reduce){.t{animation:none}}';
-      const box = doc.createElement('div');
-      box.className = 't';
-      const dot = doc.createElement('span');
-      dot.className = 'd';
-      const text = doc.createElement('span');
-      text.textContent = message;
-      box.append(dot, text);
-      shadow.append(style, box);
-      doc.documentElement.appendChild(host);
-      setTimeout(() => host.remove(), 2400);
-    } catch (e) { /* toast is best-effort */ }
   }
 
   /* ------------------------------------------------------------------ *
@@ -330,15 +322,8 @@
       if (opts.download) result.downloaded = triggerDownload(out, result.meta.filename, doc);
 
       if (opts.toast && settings.toast) {
-        let msg;
-        if (opts.download) {
-          msg = result.downloaded ? 'Saved ' + result.meta.filename : 'Could not save the file';
-        } else {
-          msg = result.copied
-            ? 'Copied as Markdown · ≈' + formatTokens(tokens) + ' tokens'
-            : 'Could not copy — open the Downright popup';
-        }
-        showToast(msg, opts.download ? result.downloaded : result.copied, doc);
+        const toast = root.__downright && root.__downright.showToast;
+        if (toast) toast(describeClip(result, opts, tokens), doc);
       }
       return result;
     } catch (e) {
