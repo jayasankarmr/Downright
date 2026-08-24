@@ -32,6 +32,16 @@ Because the existing ones get the hard parts wrong, and the hard parts are the p
 - **Full permission list**: `activeTab`, `scripting`, `clipboardWrite`, `storage`,
   `contextMenus`. That's it.
 - Token estimates are computed locally (`≈ chars/4`, CJK-weighted). No tokenizer API calls.
+- **What you can read is what you get.** Clips are meant to be pasted into an AI chat,
+  which makes a clipper a delivery path for text a page hides from the reader on purpose.
+  Downright drops it: elements hidden by `opacity:0`, `font-size:0`, off-screen
+  positioning, `text-indent`, or the `.sr-only` clip recipe are pruned alongside the
+  usual `display:none`, and invisible Unicode carriers — the Tag block (`U+E0000`–
+  `U+E007F`), zero-width joiners, word joiners, and bidi overrides — are stripped from
+  every text node, code block, alt text, and title. Gradient text (`color: transparent`)
+  is deliberately kept: it is real, readable content. See `tests/pages/18-hidden-text.html`.
+- Links resolve to `http(s)`, `mailto`, or `tel` only. `file:`, `intent:`, `ms-msdt:` and
+  other custom protocol handlers never make it into a clip.
 
 ## Install
 
@@ -55,7 +65,6 @@ bash scripts/run-tests.sh        # conversion suite in headless Chrome (20 fixtu
 node --test tests/unit.test.mjs  # pure-helper unit tests
 bash scripts/check-no-network.sh # the no-network audit
 bash scripts/build.sh            # store zips → dist/
-node scripts/make-icons.js       # regenerate icons (procedural, no image tools)
 bash scripts/make-screenshots.sh # regenerate store screenshots (headless Chrome)
 ```
 

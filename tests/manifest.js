@@ -30,6 +30,11 @@ window.TEST_CASES = [
   },
   { id: '15-links-edge', page: '15-links-edge.html', mode: 'full' },
   { id: '16-whitespace', page: '16-whitespace.html', mode: 'full' },
+  { id: '18-hidden-text', page: '18-hidden-text.html', mode: 'full' },
+  {
+    id: '17-wikipedia-polish', page: '17-wikipedia-polish.html', mode: 'article',
+    settings: { titleHeading: true },
+  },
   {
     id: 'composite-a-wikipedia', page: 'composite-a-wikipedia.html', mode: 'article',
     settings: { titleHeading: true },

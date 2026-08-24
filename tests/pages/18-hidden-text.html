@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hidden text and invisible characters</title>
+  <style>
+    /* Every way a page can hide text without taking it out of the render
+       tree — display:none and visibility:hidden are covered elsewhere. */
+    .zero-opacity { opacity: 0; }
+    .zero-font    { font-size: 0; }
+    .offscreen    { position: absolute; left: -9999px; }
+    .fixed-off    { position: fixed; top: -5000px; }
+    .indented     { text-indent: -9999px; }
+    .sr-only      { position: absolute; width: 1px; height: 1px;
+                    overflow: hidden; clip: rect(0, 0, 0, 0); }
+    .clipped      { clip-path: inset(50%); }
+
+    /* Must SURVIVE: gradient text is `color: transparent` plus
+       background-clip, and it is all over the real web. */
+    .gradient { color: transparent; background: linear-gradient(90deg, #f00, #00f);
+                -webkit-background-clip: text; background-clip: text; }
+
+    /* Must SURVIVE: font-size:0 on a wrapper is the classic fix for
+       inline-block whitespace; the children reset their own size. */
+    .wrapper-zero { font-size: 0; }
+    .wrapper-zero > span { font-size: 16px; }
+  </style>
+</head>
+<body>
+  <p>Visible paragraph one.</p>
+
+  <p class="zero-opacity">HIDDEN opacity zero.</p>
+  <p class="zero-font">HIDDEN font size zero.</p>
+  <p class="offscreen">HIDDEN positioned off screen.</p>
+  <p class="fixed-off">HIDDEN fixed off screen.</p>
+  <p class="indented">HIDDEN text indent.</p>
+  <span class="sr-only">HIDDEN screen reader only.</span>
+  <p class="clipped">HIDDEN clip path.</p>
+
+  <h2 class="gradient">Gradient heading survives</h2>
+  <p class="wrapper-zero"><span>Wrapper reset text survives.</span></p>
+
+  <!-- Unicode Tag block: invisible codepoints that carry plain ASCII. -->
+  <p>Tags: keep&#xE0048;&#xE0049;&#xE0044;&#xE0044;&#xE0045;&#xE004E; this.</p>
+  <!-- Bidi overrides, zero-width joiner, word joiner, invisible plus. -->
+  <p>Bidi: start&#x202E;middle&#x202C;end.</p>
+  <p>Joiners: a&#x200D;b&#x2060;c&#x2064;d.</p>
+
+  <p>Visible paragraph two.</p>
+</body>
+</html>

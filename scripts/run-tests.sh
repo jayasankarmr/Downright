@@ -34,7 +34,7 @@ trap cleanup EXIT
 
 # Reuse an already-running server on the port; otherwise start one.
 if ! curl -sf "http://localhost:${PORT}/tests/harness.html" -o /dev/null 2>/dev/null; then
-  python3 -m http.server "$PORT" --directory "$ROOT" >/dev/null 2>&1 &
+  python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$ROOT" >/dev/null 2>&1 &
   SERVER_PID=$!
   for _ in $(seq 1 40); do
     curl -sf "http://localhost:${PORT}/tests/harness.html" -o /dev/null 2>/dev/null && break

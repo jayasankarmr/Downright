@@ -12,7 +12,7 @@ character limit, the text is already inside it.
 ## Properties
 
 - **Category**: Productivity
-- **Privacy policy URL**: `https://github.com/<your-username>/downright/blob/main/PRIVACY.md`
+- **Privacy policy URL**: `https://github.com/jayasankarmr/Downright/blob/main/PRIVACY.md`
   (or your GitHub Pages URL once set up — any public URL to PRIVACY.md works)
 - **Website**: the GitHub repository URL
 - **Support contact**: your email or the repo's Issues URL
@@ -66,10 +66,18 @@ character limit, the text is already inside it.
 >   it, and never in the background.
 > • No accounts, no analytics, no tracking. Free, and open source on GitHub so you can
 >   check all of the above.
+> • Text a page hides from you — off-screen, zero-opacity, or written in invisible
+>   Unicode — is dropped, not clipped. What you can read is what you get.
 
 **Search terms** (Partner Center allows up to 7)
 
-> markdown clipper; copy as markdown; markdown for AI; web to markdown; markdown converter; obsidian clipper; save page as markdown
+> markdown clipper; copy as markdown; markdown for AI; web to markdown; markdown converter; markdown for obsidian; save page as markdown
+
+> [!NOTE]
+> Deliberately **not** used as a search term: "obsidian clipper". Obsidian ships an
+> official *Obsidian Web Clipper*, and bidding on another product's name as a store
+> keyword is the standard trigger for a trademark complaint and a listing takedown.
+> "markdown for obsidian" describes compatibility, which is fair use.
 
 ## Media
 
@@ -90,4 +98,4 @@ character limit, the text is already inside it.
 > clipboard (or a local .md download). All conversion is local; the extension contains
 > no network calls of any kind and requests no host permissions. Content scripts are
 > injected only on user invocation via activeTab. Source code:
-> https://github.com/<your-username>/downright
+> https://github.com/jayasankarmr/Downright

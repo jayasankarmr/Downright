@@ -26,17 +26,22 @@ fi
 
 shot() { # file.html out.png WxH
   local page="$1" out="$2" size="$3"
+  # --virtual-time-budget lets the promo-tile scenes finish loading their
+  # Google Fonts before the screenshot fires; render offline and the type
+  # falls back to system fonts.
   "$CHROME" --headless=new --disable-gpu --no-sandbox --no-first-run \
     --hide-scrollbars --force-device-scale-factor=1 \
+    --virtual-time-budget=10000 \
     --window-size="${size/x/,}" --screenshot="$out" \
     "file://$ROOT/store-assets/scenes/$page" 2>/dev/null
   echo "  $out"
 }
 
 echo "rendering store screenshots:"
-shot scene-1-hero.html      "$OUT/screenshot-1-hero.png"     1280x800
-shot scene-2-tables.html    "$OUT/screenshot-2-tables.png"   1280x800
-shot scene-3-fidelity.html  "$OUT/screenshot-3-fidelity.png" 1280x800
-shot scene-4-private.html   "$OUT/screenshot-4-private.png"  1280x800
-shot promo-tile-small.html  "$OUT/promo-tile-440x280.png"    440x280
+shot scene-1-hero.html           "$OUT/screenshot-1-hero.png"        1280x800
+shot scene-2-tables.html         "$OUT/screenshot-2-tables.png"      1280x800
+shot scene-3-fidelity.html       "$OUT/screenshot-3-fidelity.png"    1280x800
+shot scene-4-private.html        "$OUT/screenshot-4-private.png"     1280x800
+shot scene-promo-tile.html       "$OUT/promo-tile-440x280.png"       440x280
+shot scene-promo-tile-dark.html  "$OUT/promo-tile-440x280-dark.png"  440x280
 echo "done"

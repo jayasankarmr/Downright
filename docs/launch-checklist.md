@@ -6,23 +6,21 @@ alongside. You can be live on Edge without spending a rupee.
 
 ## Your four jobs (nobody else can do these)
 
-### 1. GitHub account + repo — do this now (~10 min)
+### 1. GitHub account + repo — done
 
-1. Create the repository (suggested name `downright`, public).
-2. Push this project:
-   ```bash
-   git remote add origin git@github.com:<your-username>/downright.git
-   git push -u origin main
-   ```
-   CI runs automatically on push (syntax check → no-network audit → unit tests →
-   conversion suite in headless Chrome → store zips as downloadable artifacts).
-3. For unattended maintenance later, create a fine-grained personal access token scoped
-   to just this repo (Contents + Issues + Pull requests, read/write) and share it with
-   me in a session — that's what lets the weekly watch file issues and push fixes.
-4. Replace the two `<your-username>` / `REPLACE-ME` placeholders:
-   - `README.md` (store links section when live)
-   - `src/options/options.html` (the source-code link)
-   - the listing docs in `docs/`
+The repository is live at <https://github.com/jayasankarmr/Downright> and every
+placeholder link in the extension and the listing docs now points at it. CI runs
+automatically on push (syntax check → no-network audit → unit tests → conversion suite in
+headless Chrome → store zips as downloadable artifacts).
+
+Two things still worth doing on the repo itself:
+
+- Confirm it is **public** — the privacy policy URL, the "Source code:" line in both
+  certification notes, and the "open source so you can check" claim in the listing all
+  break if it is not.
+- For unattended maintenance later, create a fine-grained personal access token scoped to
+  just this repo (Contents + Issues + Pull requests, read/write). Keep it out of the repo
+  and rotate it if it is ever pasted anywhere it should not be.
 
 ### 2. Microsoft Partner Center account — before Edge submission (~15 min, free)
 

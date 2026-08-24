@@ -1,6 +1,7 @@
 /* Downright — Node unit tests for the pure (DOM-free) helpers.
  * The full conversion suite runs in a real browser (scripts/run-tests.sh);
- * these cover the string-level building blocks. Run: node --test tests/ */
+ * these cover the string-level building blocks.
+ * Run: node --test tests/unit.test.mjs */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -75,6 +76,33 @@ test('sanitizeFilename: strips path separators and control chars', () => {
   assert.equal(clip.sanitizeFilename(''), 'clip');
 });
 
+test('sanitizeFilename: bidi overrides cannot spoof the download name', () => {
+  assert.equal(clip.sanitizeFilename('report‮gnp.md'), 'reportgnp.md');
+  assert.equal(clip.sanitizeFilename('⁦a⁩b'), 'ab');
+});
+
+test('sanitizeFilename: Windows reserved device names are defused', () => {
+  assert.equal(clip.sanitizeFilename('CON'), 'CON-clip');
+  assert.equal(clip.sanitizeFilename('com1'), 'com1-clip');
+  assert.equal(clip.sanitizeFilename('lpt9'), 'lpt9-clip');
+  assert.equal(clip.sanitizeFilename('console'), 'console'); // not reserved
+});
+
+test('cleanText: invisible carriers are stripped', () => {
+  // Unicode Tag block — plain ASCII in codepoints nothing paints.
+  assert.equal(convert.cleanText('keep\u{E0048}\u{E0049}this'), 'keepthis');
+  assert.equal(convert.cleanText('a‍b⁠c⁤d'), 'abcd');
+  assert.equal(convert.cleanText('start‮mid‬end'), 'startmidend');
+  assert.equal(convert.cleanText('‎‏plain'), 'plain');
+});
+
+test('cleanText: visible text and the existing normalisations survive', () => {
+  assert.equal(convert.cleanText('ordinary text'), 'ordinary text');
+  assert.equal(convert.cleanText('a b'), 'a b');   // nbsp → space
+  assert.equal(convert.cleanText('so­ft'), 'soft'); // soft hyphen
+  assert.equal(convert.cleanText('emoji 👍 and 日本語'), 'emoji 👍 and 日本語');
+});
+
 test('buildFilename: template placeholders', () => {
   const name = clip.buildFilename('{title} ({domain})', {
     title: 'My Page', url: 'https://www.example.com/x',
@@ -85,4 +113,35 @@ test('buildFilename: template placeholders', () => {
 test('yamlValue: quotes and escapes', () => {
   assert.equal(clip.yamlValue('plain'), '"plain"');
   assert.equal(clip.yamlValue('say "hi"'), '"say \\"hi\\""');
+});
+
+test('wrapEmphasis: italic around bold keeps both', () => {
+  assert.equal(convert.wrapEmphasis('**x**', '*'), '***x***');
+  assert.equal(convert.wrapEmphasis('*x*', '**'), '***x***');
+});
+
+test('wrapEmphasis: redundant same-marker wrap is dropped', () => {
+  assert.equal(convert.wrapEmphasis('*x*', '*'), '*x*');
+  assert.equal(convert.wrapEmphasis('**x**', '**'), '**x**');
+  assert.equal(convert.wrapEmphasis('***x***', '*'), '***x***');
+  assert.equal(convert.wrapEmphasis('~~x~~', '~~'), '~~x~~');
+});
+
+test('wrapEmphasis: flush same-kind boundary skips the wrap', () => {
+  assert.equal(convert.wrapEmphasis('*Shokaku* under attack', '*'), '*Shokaku* under attack');
+  assert.equal(convert.wrapEmphasis('ends with *italic*', '*'), 'ends with *italic*');
+  assert.equal(convert.wrapEmphasis('**bold** rest', '**'), '**bold** rest');
+});
+
+test('wrapEmphasis: different-kind flush boundary still wraps', () => {
+  assert.equal(convert.wrapEmphasis('*a* rest', '**'), '***a* rest**');
+  assert.equal(convert.wrapEmphasis('plain', '*'), '*plain*');
+});
+
+test('decorate: skipped when content already carries emphasis', () => {
+  assert.equal(convert.decorate('*Shokaku* under attack', '*'), '*Shokaku* under attack');
+  assert.equal(convert.decorate('A static test firing', '*'), '*A static test firing*');
+  assert.equal(convert.decorate('has **bold** inside', '**'), 'has **bold** inside');
+  assert.equal(convert.decorate('has *italic* inside', '**'), '**has *italic* inside**');
+  assert.equal(convert.decorate('escaped 2\\*3', '*'), '*escaped 2\\*3*');
 });
