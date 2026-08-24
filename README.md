@@ -79,6 +79,9 @@ with side-by-side diffs.
 ```
 background.js          thin: context menus, keyboard command, badge
 popup/                 preview UI; injects and calls the converter itself
+options/               settings; every switch previews its own effect as a diff
+common/defaults.js     the settings every surface agrees on
+common/toast.js        the in-page confirmation card, shown after a clip
 content/convert.js     the engine: DOM → GFM (tables, code, math, shadow DOM)
 content/extract.js     Readability-style main-content extraction + metadata
 content/clip.js        orchestrator: capture → convert → copy/save/toast

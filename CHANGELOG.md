@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+Interface:
+
+- **Settings rebuilt.** Sectioned cards with a sticky rail, drawn switches, segmented
+  controls, and a checklist of front-matter fields that each show the YAML line they
+  add. The bullet marker is now exposed as a setting instead of being a default nobody
+  could reach.
+- **Every setting shows its own effect.** Changing a switch pops a preview anchored to
+  the row: a small diff of the Markdown, struck-through red for the lines that go away
+  and green for the ones that arrive. An "Example" affordance on each row opens the
+  same preview on demand. The filename template resolves live under the field, through
+  the same `buildFilename` the download uses.
+- **The confirmation toast is the brand now** — the leafcutter hauls the page in,
+  snips twice, and the three lines of the clip wipe on behind her, over a headline and
+  a monospace count (`≈1.2k tokens · 4,930 chars`) with a bar counting down the
+  dismissal. It lives in `common/toast.js` so the settings preview mounts the real
+  component rather than a drawing of one, and it stills itself when a clip fails.
+- The toast, the previews, and the whole settings page honour
+  `prefers-reduced-motion` and both colour schemes.
+
 Conversion fixes, found by clipping dense Wikipedia articles:
 
 - Emphasis nesting: `<i><b>…</b></i>` now yields `***…***` instead of silently
