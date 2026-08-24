@@ -65,7 +65,6 @@ bash scripts/run-tests.sh        # conversion suite in headless Chrome (20 fixtu
 node --test tests/unit.test.mjs  # pure-helper unit tests
 bash scripts/check-no-network.sh # the no-network audit
 bash scripts/build.sh            # store zips → dist/
-node scripts/make-icons.js       # regenerate icons (procedural, no image tools)
 bash scripts/make-screenshots.sh # regenerate store screenshots (headless Chrome)
 ```
 

@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,800&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 440px; height: 280px; overflow: hidden;
+    background: #F4EFE6;
+    font-family: "Bricolage Grotesque", sans-serif;
+    display: flex; align-items: center; gap: 20px; padding: 0 34px; position: relative;
+  }
+  .rule { position: absolute; left: 0; right: 0; top: 0; height: 9px;
+          background: repeating-linear-gradient(90deg, #17140F 0 9px, transparent 9px 18px); }
+  .medallion { background: #F4EFE6; border-radius: 22px; width: 148px; height: 148px;
+               display: flex; align-items: center; justify-content: center; flex: none; }
+  .name { font-size: 38px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+          color: #17140F; }
+  .sub { font-family: "IBM Plex Mono", monospace; font-size: 12px; line-height: 1.55;
+         color: #4A4437; }
+  .copy { display: flex; flex-direction: column; gap: 9px; }
+</style>
+</head>
+<body>
+<div class="rule"></div>
+<svg width="136" height="136" viewBox="0 0 100 100" style="flex:none;">
+    <defs><filter id="r" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.038" numOctaves="3" seed="41" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter></defs>
+    <g filter="url(#r)">
+      <g transform="rotate(-13 55 27)">
+        <rect x="24" y="4" width="62" height="44" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+        <rect x="32" y="13" width="26" height="3.8" fill="#17140F"/>
+        <rect x="32" y="23" width="46" height="3.8" fill="#2D5DAE"/>
+        <rect x="32" y="33" width="34" height="3.8" fill="#17140F"/>
+      </g>
+      <path d="M60 58 L54 45 M72 57 L79 45" stroke="#17140F" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+      <path d="M36 84 L26 95 M48 82 L46 97 M58 80 L68 94" stroke="#17140F" stroke-width="4.4" stroke-linecap="round" fill="none"/>
+      <ellipse cx="24" cy="76" rx="16" ry="12.5" transform="rotate(-8 24 76)" fill="#17140F"/>
+      <ellipse cx="38" cy="75" rx="5.5" ry="4.5" fill="#17140F"/>
+      <ellipse cx="50" cy="72" rx="11" ry="9.5" fill="#17140F"/>
+      <path d="M77 62 L88 66 L77 71 Z" fill="#17140F"/>
+      <circle cx="68" cy="67" r="10.5" fill="#17140F"/>
+      <circle cx="71" cy="63.5" r="3" fill="#F4EFE6"/>
+    </g>
+  </svg>
+  <div class="copy">
+    <div class="name">Downright</div>
+    <div class="sub">any page → correct Markdown<br>nothing sent, nothing stored</div>
+  </div>
+</body>
+</html>
