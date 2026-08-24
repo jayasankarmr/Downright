@@ -21,7 +21,7 @@
     "contextMenus"
   ],
   "background": {
-    "scripts": ["common/defaults.js", "background.js"]
+    "scripts": ["common/defaults.js", "common/blocked.js", "background.js"]
   },
   "action": {
     "default_title": "Downright — copy this page as Markdown",

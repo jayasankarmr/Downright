@@ -83,19 +83,18 @@
 
   /* What the toast says. Kept beside the other string builders so the
    * wording lives with the code that measures the clip, not with the code
-   * that paints it. */
+   * that paints it.
+   *
+   * A failure reads its line out of the shared catalogue in
+   * common/blocked.js, so the toast, the popup, and the toolbar tooltip
+   * cannot drift into three different accounts of the same refusal. */
   function describeClip(result, opts, tokens) {
-    if (opts.download) {
-      return result.downloaded
-        ? { ok: true, title: 'Saved as Markdown', detail: result.meta.filename }
-        : { ok: false, title: 'Could not save the file', detail: 'Try the Downright popup' };
+    if (result.reason) {
+      const info = describeReason(result.reason);
+      return { ok: false, title: info.title, detail: info.detail };
     }
-    if (!result.copied) {
-      return {
-        ok: false,
-        title: 'Could not reach the clipboard',
-        detail: 'Open the Downright popup to copy',
-      };
+    if (opts.download) {
+      return { ok: true, title: 'Saved as Markdown', detail: result.meta.filename };
     }
     return {
       ok: true,
@@ -202,16 +201,25 @@
     }
   }
 
+  /* Returns { ok, reason }. A bare false told the toast nothing, and "could
+   * not copy" is about the least useful thing a clipper can say. The two
+   * failures worth telling apart are a page that forbids clipboard writes
+   * outright and one that simply is not focused — only the second is the
+   * reader's to fix. */
   async function copyText(text, doc) {
+    let reason = 'clipboard-blocked';
     try {
       await navigator.clipboard.writeText(text);
-      return true;
-    } catch (e) { /* fall through */ }
-    try {
-      return legacyCopy(text, doc);
+      return { ok: true, reason: null };
     } catch (e) {
-      return false;
+      try {
+        if (doc.hasFocus && !doc.hasFocus()) reason = 'page-not-focused';
+      } catch (err) { /* ignore */ }
     }
+    try {
+      if (legacyCopy(text, doc)) return { ok: true, reason: null };
+    } catch (e) { /* fall through */ }
+    return { ok: false, reason };
   }
 
   /* The anchor is deliberately never appended to the page. Attached, its
@@ -230,6 +238,36 @@
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /* Raises the shared toast component and reports whether it actually
+   * landed — show() returns null when the DOM would not have it, and the
+   * background worker needs that answer to decide whether the reason still
+   * has to be delivered somewhere else. */
+  function announce(spec, doc) {
+    const fn = root.__downright && root.__downright.showToast;
+    if (typeof fn !== 'function') return false;
+    return !!fn(spec, doc);
+  }
+
+  function describeReason(code) {
+    const b = root.DOWNRIGHT_BLOCKED;
+    if (b && typeof b.describe === 'function') return b.describe(code);
+    return { code, title: 'Downright couldn’t clip this page', detail: '' };
+  }
+
+  /* Chrome hands a PDF to a built-in viewer and leaves the tab's document a
+   * near-empty <embed> shell. Injection succeeds, so nothing throws — the
+   * clip just comes back blank. Name it instead of shrugging. */
+  function isPdfDocument(doc) {
+    try {
+      if (/pdf/i.test(doc.contentType || '')) return true;
+      const first = doc.body && doc.body.firstElementChild;
+      return !!(first && first.localName === 'embed' &&
+        /pdf/i.test(first.getAttribute('type') || ''));
     } catch (e) {
       return false;
     }
@@ -287,6 +325,10 @@
 
       let out = '';
       const isSelection = mode === 'selection' && hasSelection;
+      /* What was actually captured, which is not always what was asked for:
+       * a selection clip with nothing selected falls through to the article.
+       * The toast reads this, so it has to be the branch that ran. */
+      const capturedMode = isSelection ? 'selection' : (mode === 'full' ? 'full' : 'article');
       if (settings.frontmatter && !isSelection) {
         out += buildFrontmatter(meta, settings);
       } else if (!isSelection && settings.titleHeading && meta.title) {
@@ -306,24 +348,42 @@
         warnings,
         copied: false,
         downloaded: false,
+        reason: null,
+        toasted: false,
         meta: {
           title: meta.title,
           url: meta.url,
           author: meta.author,
           published: meta.published,
-          mode,
+          mode: capturedMode,
           tokens,
           chars: out.length,
           filename: buildFilename(settings.filenameTemplate, meta),
         },
       };
 
-      if (opts.copy) result.copied = await copyText(out, doc);
-      if (opts.download) result.downloaded = triggerDownload(out, result.meta.filename, doc);
+      // Nothing came back? Say so, rather than putting an empty clip on the
+      // clipboard and reporting success.
+      if (isPdfDocument(doc)) result.reason = 'pdf-viewer';
+      else if (!bodyMd.trim()) result.reason = 'empty-page';
 
-      if (opts.toast && settings.toast) {
-        const toast = root.__downright && root.__downright.showToast;
-        if (toast) toast(describeClip(result, opts, tokens), doc);
+      if (!result.reason) {
+        if (opts.copy) {
+          const copied = await copyText(out, doc);
+          result.copied = copied.ok;
+          if (!copied.ok) result.reason = copied.reason;
+        }
+        if (opts.download) {
+          result.downloaded = triggerDownload(out, result.meta.filename, doc);
+          if (!result.downloaded) result.reason = 'download-blocked';
+        }
+      }
+
+      /* The toast preference governs the confirmation, not the diagnosis: a
+       * failure the reader never sees is the bug this whole path exists to
+       * fix, so failures always speak. */
+      if (opts.toast && (result.reason ? true : settings.toast)) {
+        result.toasted = announce(describeClip(result, opts, tokens), doc);
       }
       return result;
     } catch (e) {

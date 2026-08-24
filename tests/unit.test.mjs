@@ -9,6 +9,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const convert = require('../src/content/convert.js');
 const clip = require('../src/content/clip.js');
+const blocked = require('../src/common/blocked.js');
 
 test('escapeInlineText: emphasis-forming asterisks only', () => {
   assert.equal(convert.escapeInlineText('*bold*'), '\\*bold\\*');
@@ -144,4 +145,63 @@ test('decorate: skipped when content already carries emphasis', () => {
   assert.equal(convert.decorate('has **bold** inside', '**'), 'has **bold** inside');
   assert.equal(convert.decorate('has *italic* inside', '**'), '**has *italic* inside**');
   assert.equal(convert.decorate('escaped 2\\*3', '*'), '*escaped 2\\*3*');
+});
+
+/* ------------------------------------------------------------------ *
+ * Why a clip didn't happen
+ * ------------------------------------------------------------------ */
+
+test('classifyUrl: browser-reserved schemes', () => {
+  assert.equal(blocked.classifyUrl('chrome://extensions'), 'browser-page');
+  assert.equal(blocked.classifyUrl('edge://settings/privacy'), 'browser-page');
+  assert.equal(blocked.classifyUrl('about:preferences'), 'browser-page');
+  assert.equal(blocked.classifyUrl('devtools://devtools/bundled/inspector.html'), 'browser-page');
+  assert.equal(blocked.classifyUrl('view-source:https://example.com/'), 'browser-page');
+});
+
+test('classifyUrl: extension pages and empty tabs', () => {
+  assert.equal(blocked.classifyUrl('chrome-extension://abcd/popup.html'), 'extension-page');
+  assert.equal(blocked.classifyUrl('moz-extension://abcd/popup.html'), 'extension-page');
+  assert.equal(blocked.classifyUrl('about:blank'), 'blank-page');
+  assert.equal(blocked.classifyUrl('about:blank#x'), 'blank-page');
+});
+
+test('classifyUrl: the add-on galleries', () => {
+  assert.equal(blocked.classifyUrl('https://chromewebstore.google.com/detail/x'), 'web-store');
+  assert.equal(blocked.classifyUrl('https://addons.mozilla.org/en-US/firefox/'), 'web-store');
+  assert.equal(blocked.classifyUrl('https://chrome.google.com/webstore/detail/x'), 'web-store');
+  assert.equal(blocked.classifyUrl('https://microsoftedge.microsoft.com/addons/detail/x'), 'web-store');
+  // Same hosts, ordinary pages — not blocked.
+  assert.equal(blocked.classifyUrl('https://chrome.google.com/'), null);
+  assert.equal(blocked.classifyUrl('https://microsoftedge.microsoft.com/'), null);
+});
+
+test('classifyUrl: file URLs and PDFs', () => {
+  assert.equal(blocked.classifyUrl('file:///Users/me/notes.html'), 'local-file');
+  assert.equal(blocked.classifyUrl('https://example.com/paper.PDF'), 'pdf-viewer');
+  // A ".pdf" in the query is not a PDF.
+  assert.equal(blocked.classifyUrl('https://example.com/view?doc=paper.pdf'), null);
+});
+
+test('classifyUrl: ordinary and unreadable URLs stay unclassified', () => {
+  assert.equal(blocked.classifyUrl('https://en.wikipedia.org/wiki/Markdown'), null);
+  assert.equal(blocked.classifyUrl('http://localhost:8631/tests/harness.html'), null);
+  assert.equal(blocked.classifyUrl(''), null);
+  assert.equal(blocked.classifyUrl(undefined), null);
+  assert.equal(blocked.classifyUrl('not a url at all'), null);
+});
+
+test('describe: every reason has a title and an actionable detail', () => {
+  for (const code of Object.keys(blocked.REASONS)) {
+    const info = blocked.describe(code);
+    assert.equal(info.code, code);
+    assert.ok(info.title.length > 0, code + ' has no title');
+    assert.ok(info.detail.length > 20, code + ' has no detail');
+  }
+});
+
+test('describe: an unknown code still says something', () => {
+  const info = blocked.describe('who-knows');
+  assert.equal(info.code, 'who-knows');
+  assert.ok(info.title.length > 0);
 });

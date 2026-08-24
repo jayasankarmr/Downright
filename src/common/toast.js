@@ -133,7 +133,14 @@
       'color:', muted, ';margin-bottom:2px}',
       '.title{font-size:13.5px;font-weight:600;letter-spacing:-.005em;line-height:1.3;',
       'color:', text, ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
-      '.card.err .title{color:', accent, '}',
+      /* A success is a headline and a count, and both fit one line. A failure
+       * is a sentence with something to do in it, so the error variant drops
+       * the truncation and lets the card grow downward instead — same width,
+       * same corner, same medallion. */
+      '.card.err .title{color:', accent, ';white-space:normal}',
+      '.card.err .meta{white-space:normal;',
+      'font:400 12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}',
+      '.card.err{align-items:flex-start}',
       '.meta{margin-top:3px;font:400 11.5px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;',
       'color:', muted, ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
 
