@@ -38,8 +38,16 @@
       .replace(/\s+/g, ' ')
       .replace(/^[\s.\-]+|[\s.]+$/g, '')
       .slice(0, 120)
-      .trim();
-    return cleaned || 'clip';
+      .trim()
+      // Bidi overrides let a page make a filename read backwards in the
+      // download shelf. The page chooses this string; it does not get to
+      // choose what the user sees.
+      .replace(/[\u202A-\u202E\u2066-\u2069\u200E\u200F]/g, '');
+    if (!cleaned) return 'clip';
+    // CON.md is still CON on Windows — the reserved device names swallow
+    // the save whatever extension follows them.
+    if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(cleaned)) return cleaned + '-clip';
+    return cleaned;
   }
 
   function yamlValue(v) {
@@ -133,26 +141,59 @@
    * Clipboard, download, toast
    * ------------------------------------------------------------------ */
 
+  /* The execCommand fallback fires a real `copy` event in the page, and a
+   * page listener can rewrite the clipboard payload out from under us —
+   * putting whatever it likes on the user's clipboard while the toast says
+   * "Copied ✓". So the fallback writes the data itself from a capturing
+   * listener and stops the event there, and it puts the user's own
+   * selection back afterwards instead of eating it. */
+  function legacyCopy(text, doc) {
+    const sel = doc.getSelection();
+    const saved = [];
+    for (let i = 0; sel && i < sel.rangeCount; i++) saved.push(sel.getRangeAt(i));
+
+    const onCopy = (e) => {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      if (e.clipboardData) e.clipboardData.setData('text/plain', text);
+    };
+    doc.addEventListener('copy', onCopy, true);
+
+    const ta = doc.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+    try {
+      doc.body.appendChild(ta);
+      ta.select();
+      return !!doc.execCommand('copy');
+    } finally {
+      doc.removeEventListener('copy', onCopy, true);
+      ta.remove();
+      if (sel && saved.length) {
+        sel.removeAllRanges();
+        for (const r of saved) sel.addRange(r);
+      }
+    }
+  }
+
   async function copyText(text, doc) {
     try {
       await navigator.clipboard.writeText(text);
       return true;
     } catch (e) { /* fall through */ }
     try {
-      const ta = doc.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
-      doc.body.appendChild(ta);
-      ta.select();
-      const ok = doc.execCommand('copy');
-      ta.remove();
-      return !!ok;
+      return legacyCopy(text, doc);
     } catch (e) {
       return false;
     }
   }
 
+  /* The anchor is deliberately never appended to the page. Attached, its
+   * blob: URL carries the page's origin, so page script could observe the
+   * save, read the whole clip back out of the blob, and cancel the click
+   * from a capturing listener. Detached, the click still downloads and the
+   * page sees nothing. */
   function triggerDownload(text, filename, doc) {
     try {
       const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
@@ -160,9 +201,8 @@
       const a = doc.createElement('a');
       a.href = url;
       a.download = filename;
-      doc.body.appendChild(a);
+      a.rel = 'noopener';
       a.click();
-      a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       return true;
     } catch (e) {

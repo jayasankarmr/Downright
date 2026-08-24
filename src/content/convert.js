@@ -38,7 +38,7 @@
   // Hard junk is pruned unconditionally in article mode — a "menu" or
   // "dropdown" container is site chrome even when a sibling class says
   // "content" (Wikipedia's .vector-menu-content language switcher).
-  const JUNK_HARD = /(^|[-_ ])(nav|navbar|navigation|menu|dropdown|portlet|interlanguage|breadcrumbs?|banner|toolbar|masthead|skip-link|screen-reader|sr-only|visually-hidden|edit-?section|noprint|mw-jump|mw-indicators|catlinks)([-_ ]|$)/i;
+  const JUNK_HARD = /(^|[-_ ])(nav|navbar|navbox|navigation|menu|dropdown|portlet|interlanguage|breadcrumbs?|banner|toolbar|masthead|skip-link|screen-reader|sr-only|visually-hidden|edit-?section|noprint|mw-jump|mw-indicators|catlinks)([-_ ]|$)/i;
   const JUNK_NEGATIVE = /(^|[-_ ])(share|sharing|social|related|recommend|newsletter|subscribe|promo|advert|ads?|sponsor|cookie|consent|gdpr|pagination|pager|comments?|disqus|sidebar|popup|modal|overlay|tooltip|site-?(header|footer|nav)|footer|toc)([-_ ]|$)/i;
   const JUNK_POSITIVE = /(^|[-_ ])(article|post|entry|content|main|body|text|story|blog|page|markdown|prose)([-_ ]|$)/i;
 
@@ -108,13 +108,30 @@
     return (doc && doc.baseURI) || node.baseURI || '';
   }
 
+  /* An allowlist, not a denylist. A clip is meant to be opened somewhere
+   * else — Obsidian, a preview pane, a chat window — where a link is one
+   * click from acting. http(s)/mailto/tel are the only schemes that do
+   * something a reader expects; file:, intent:, ms-msdt:, search-ms: and
+   * every registered custom protocol handler are not. */
+  const SAFE_SCHEMES = new Set(['http:', 'https:', 'mailto:', 'tel:']);
+
   function absoluteUrl(rawValue, node) {
     if (!rawValue) return null;
     const value = rawValue.trim();
     if (!value) return null;
-    if (/^(javascript|vbscript|data|blob|about|chrome|filesystem):/i.test(value)) return null;
     try {
-      return new URL(value, baseUriOf(node)).href;
+      const url = new URL(value, baseUriOf(node));
+      if (!SAFE_SCHEMES.has(url.protocol)) return null;
+      // utm_* params are analytics-only by convention and never select the
+      // resource (Wikipedia's Parsoid HTML stamps them on every thumbnail).
+      if (/(?:^|[?&])utm_/i.test(url.search)) {
+        const drop = [];
+        for (const key of url.searchParams.keys()) {
+          if (/^utm_/i.test(key)) drop.push(key);
+        }
+        for (const key of drop) url.searchParams.delete(key);
+      }
+      return url.href;
     } catch (e) {
       return null;
     }
@@ -145,8 +162,20 @@
    * Text cleaning and escaping
    * ------------------------------------------------------------------ */
 
+  /* Characters that render as nothing but survive a copy: zero-width
+   * joiners, word joiners, invisible operators, bidi overrides, and the
+   * Unicode Tag block (U+E0000–E007F), which encodes plain ASCII in
+   * codepoints no browser paints. A page can hide a paragraph of
+   * instructions in them, invisible to the reader, and have it ride the
+   * clip into a chat window. cleanText is the single choke point every
+   * text node, code block, alt text, and title attribute passes through,
+   * so stripping here covers the whole surface. */
+  const INVISIBLE_RE =
+    /[\u200C-\u200F\u2060-\u2064\u202A-\u202E\u2066-\u2069\uFFF9-\uFFFB\u{E0000}-\u{E007F}]/gu;
+
   function cleanText(s) {
     return s
+      .replace(INVISIBLE_RE, '')
       .replace(/[­​﻿]/g, '')  // soft hyphen, zero-width space, BOM
       .replace(/ /g, ' ');              // nbsp → plain space
   }
@@ -197,6 +226,45 @@
    * Skip / prune decisions
    * ------------------------------------------------------------------ */
 
+  /* Text the reader cannot see but a DOM walk still collects. display:none
+   * and visibility:hidden are handled by the caller; these are the ways a
+   * page hides text while leaving it in the render tree — which is exactly
+   * what makes them a smuggling channel for a clip headed to an AI chat.
+   *
+   * Deliberately not checked: transparent or background-matched text
+   * colour. Gradient headings (`color: transparent` + `background-clip:
+   * text`) are everywhere on the modern web, and pruning them would eat
+   * real headings to close a channel the invisible-character strip and
+   * these rules already narrow. */
+  function isVisuallyHidden(el, st) {
+    if (parseFloat(st.opacity) === 0) return true;
+
+    // font-size:0 on a wrapper is a legitimate trick for killing inline-block
+    // whitespace, with children resetting the size — so only a leaf carrying
+    // its own text is hidden by it.
+    if (parseFloat(st.fontSize) === 0 && !el.firstElementChild) return true;
+
+    if (st.position === 'absolute' || st.position === 'fixed') {
+      const offscreen = (v) => {
+        const n = parseFloat(v);
+        return Number.isFinite(n) && n <= -2000;
+      };
+      if (offscreen(st.left) || offscreen(st.top)) return true;
+    }
+    if (parseFloat(st.textIndent) <= -2000) return true;
+
+    // The .sr-only / .visually-hidden recipe: a 1×1 clipped box.
+    if (st.clipPath === 'inset(50%)') return true;
+    if (st.clip && /^rect\(\s*0(px)?[\s,]/.test(st.clip)) return true;
+    const w = parseFloat(st.width);
+    const h = parseFloat(st.height);
+    if (Number.isFinite(w) && Number.isFinite(h) && w <= 1 && h <= 1 &&
+        st.overflow === 'hidden') {
+      return true;
+    }
+    return false;
+  }
+
   function shouldSkip(el, ctx) {
     const tag = el.localName;
     if (SKIP_TAGS.has(tag)) return true;
@@ -215,11 +283,13 @@
         if (st && (st.display === 'none' || st.visibility === 'hidden' || st.visibility === 'collapse')) {
           return true;
         }
+        if (st && isVisuallyHidden(el, st)) return true;
       }
     }
 
     if (ctx.articleMode) {
       if (tag === 'nav' || tag === 'aside') return true;
+      if (el.getAttribute && el.getAttribute('role') === 'navigation') return true;
       if ((tag === 'header' || tag === 'footer') && ctx.rootIsBody) return true;
       const ci = classAndId(el);
       if (ci.trim()) {
@@ -530,6 +600,26 @@
    * Inline rendering
    * ------------------------------------------------------------------ */
 
+  /* `guard.n` caps recursion depth; this caps total work. A content script
+   * runs on the page's main thread, so an enormous — or deliberately
+   * pathological — DOM would otherwise freeze the tab the user just pressed
+   * Alt+M on. Bail out with a warning instead, keeping whatever converted
+   * cleanly up to that point. */
+  const MAX_NODES = 200000;
+  const MAX_MS = 5000;
+
+  function overBudget(ctx) {
+    const b = ctx.budget;
+    if (b.stopped) return true;
+    if (++b.nodes > MAX_NODES) b.stopped = 'node-budget';
+    else if ((b.nodes & 2047) === 0 && Date.now() > b.deadline) b.stopped = 'time-budget';
+    if (b.stopped) {
+      ctx.warnings.push('truncated-' + b.stopped);
+      return true;
+    }
+    return false;
+  }
+
   function appendInline(buf, piece) {
     if (!piece) return buf;
     // Collapse a leading space only against an existing trailing space —
@@ -558,7 +648,7 @@
     const emit = (s) => { buf = appendInline(buf, s); };
 
     for (const node of flattenSlots(nodes)) {
-      if (ctx.guard.n > 900) break;
+      if (ctx.guard.n > 900 || overBudget(ctx)) break;
       if (node.nodeType === 3) {
         const collapsed = cleanText(node.nodeValue).replace(/[ \t\r\n\f]+/g, ' ');
         if (collapsed) emit(escapeInlineText(collapsed));
@@ -590,9 +680,19 @@
           case 'strong': case 'b':
             emit(wrapEmphasis(renderInline(effectiveChildren(el), ctx), '**'));
             break;
-          case 'em': case 'i': case 'cite': case 'dfn': case 'var':
+          case 'em': case 'i': case 'var':
             emit(wrapEmphasis(renderInline(effectiveChildren(el), ctx), '*'));
             break;
+          case 'cite': case 'dfn': {
+            // Sites reset these to upright — MediaWiki styles whole
+            // citations with cite { font-style: inherit } because only the
+            // inner <i> title is italic. Trust the rendered style; fall
+            // back to the browser's italic default when it is unknowable.
+            const st = computedStyleOf(el);
+            const inner = renderInline(effectiveChildren(el), ctx);
+            emit(!st || /italic|oblique/.test(st.fontStyle || '') ? wrapEmphasis(inner, '*') : inner);
+            break;
+          }
           case 'del': case 's': case 'strike':
             emit(wrapEmphasis(renderInline(effectiveChildren(el), ctx), '~~'));
             break;
@@ -643,14 +743,49 @@
     return buf;
   }
 
+  /* Wrap rendered inline Markdown in an emphasis marker. `*` and `**`
+   * share a delimiter character, so the decision needs the length of the
+   * asterisk runs the content starts and ends with: a run of 2 inside a
+   * `*` wrap is fine (***x*** = bold italic), but a flush run of the same
+   * kind (`*` + `*X* rest` → `**X* rest*`) produces Markdown no parser
+   * reads back correctly, and a fully wrapped core needs no second wrap. */
   function wrapEmphasis(inner, marker) {
     const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(inner);
     const lead = m[1] ? ' ' : '';
     const core = m[2];
     const trail = m[3] ? ' ' : '';
     if (!core) return lead || trail ? ' ' : '';
-    if (core.startsWith(marker) && core.endsWith(marker)) return lead + core + trail;
-    return lead + marker + core + marker + trail;
+    if (marker === '~~') {
+      if (core.startsWith('~~') && core.endsWith('~~')) return lead + core + trail;
+      return lead + '~~' + core + '~~' + trail;
+    }
+    const head = (/^\*+/.exec(core) || [''])[0].length;
+    const tailMatch = /(?:^|[^\\*])(\*+)$/.exec(core);
+    const tail = tailMatch ? tailMatch[1].length : 0;
+    const wrapped = Math.min(head, tail);
+    if (marker === '*') {
+      if (wrapped === 1 || wrapped >= 3) return lead + core + trail; // already italic
+      if (head === 1 || tail === 1) return lead + core + trail;      // flush italic boundary
+      return lead + '*' + core + '*' + trail;
+    }
+    if (wrapped >= 2) return lead + core + trail;                    // already bold
+    if (head >= 2 || tail >= 2) return lead + core + trail;          // flush bold boundary
+    return lead + '**' + core + '**' + trail;
+  }
+
+  /* Emphasis the converter adds by its own choice (captions, <dt> terms,
+   * summaries). Skipped when the content already carries emphasis the
+   * marker would collide with — the content's formatting wins over the
+   * decoration, and the result stays valid Markdown. */
+  function decorate(text, marker) {
+    const re = /(\\*)(\*+)/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      let run = m[2].length;
+      if (m[1].length % 2 === 1) run -= 1; // leading asterisk is escaped
+      if (run > 0 && (marker === '*' || run >= 2)) return text;
+    }
+    return marker + text + marker;
   }
 
   function renderCodeSpan(el) {
@@ -667,9 +802,7 @@
 
   function renderLink(el, ctx) {
     const inner = renderInline(effectiveChildren(el), ctx).trim();
-    const rawHref = el.getAttribute('href');
-    const url = absoluteUrl(rawHref, el) ||
-      (rawHref && /^mailto:|^tel:/i.test(rawHref.trim()) ? rawHref.trim() : null);
+    const url = absoluteUrl(el.getAttribute('href'), el);
     if (!url) return inner;
     if (!inner) return '';
     const title = el.getAttribute('title');
@@ -728,7 +861,7 @@
     };
 
     for (const node of flattenSlots(nodes)) {
-      if (ctx.guard.n > 900) break;
+      if (ctx.guard.n > 900 || overBudget(ctx)) break;
       if (node.nodeType === 3) {
         if (node.nodeValue.trim() !== '' || inlineRun.length) inlineRun.push(node);
         continue;
@@ -915,7 +1048,7 @@
   function captionBlock(el, ctx) {
     const text = renderInline(effectiveChildren(el), ctx).trim();
     if (!text) return null;
-    return { md: '*' + text + '*', kind: 'para' };
+    return { md: decorate(text, '*'), kind: 'para' };
   }
 
   function renderFigure(el, ctx) {
@@ -937,7 +1070,7 @@
       if (child.nodeType !== 1 || shouldSkip(child, ctx)) continue;
       if (child.localName === 'dt') {
         const t = renderInline(effectiveChildren(child), ctx).trim();
-        if (t) blocks.push({ md: '**' + t + '**', kind: 'para' });
+        if (t) blocks.push({ md: decorate(t, '**'), kind: 'para' });
       } else if (child.localName === 'dd') {
         blocks.push(...renderBlocks(effectiveChildren(child), ctx));
       } else if (child.localName === 'div') {
@@ -953,7 +1086,7 @@
     for (const child of effectiveChildren(el)) {
       if (child.nodeType === 1 && child.localName === 'summary') {
         const t = renderInline(effectiveChildren(child), detailsCtx).trim();
-        if (t) blocks.push({ md: '**' + t + '**', kind: 'para' });
+        if (t) blocks.push({ md: decorate(t, '**'), kind: 'para' });
       }
     }
     const rest = effectiveChildren(el).filter((n) => !(n.nodeType === 1 && n.localName === 'summary'));
@@ -977,6 +1110,8 @@
   /* ------------------------------------------------------------------ *
    * Tables
    * ------------------------------------------------------------------ */
+
+  const MAX_COLSPAN = 64;
 
   function collectRows(table) {
     const rows = [];
@@ -1028,8 +1163,28 @@
       return { md: fence + lang + '\n' + text + '\n' + fence, kind: 'code' };
     }
 
+    // A table inside a table cell: GFM cannot nest tables, so flatten each
+    // row to one line and let the outer table carry it as cell text.
+    if (ctx.inCell) {
+      const lines = [];
+      for (const info of collectRows(table)) {
+        if (shouldSkip(info.tr, ctx)) continue;
+        const cells = [];
+        for (const cell of info.tr.children) {
+          if (cell.localName !== 'td' && cell.localName !== 'th') continue;
+          const t = renderBlocks(effectiveChildren(cell), ctx)
+            .map((b) => b.md).join(' ').replace(/\s*\n\s*/g, ' ').trim();
+          if (t) cells.push(t);
+        }
+        if (cells.length) lines.push(cells.join(' · '));
+      }
+      if (!lines.length) return null;
+      ctx.warnings.push('nested-table-flattened');
+      return { md: lines.join('\n'), kind: 'para' };
+    }
+
     // Structures GFM tables cannot express: fall back to sanitized HTML.
-    if (table.querySelector('td table, th table, td pre, th pre')) {
+    if (table.querySelector('td pre, th pre')) {
       ctx.warnings.push('table-kept-as-html');
       const html = sanitizeTableHtml(table, ctx);
       return html ? { md: html, kind: 'html' } : null;
@@ -1046,9 +1201,12 @@
       for (const cell of info.tr.children) {
         if (cell.localName !== 'td' && cell.localName !== 'th') continue;
         while (grid[r][c] !== undefined) c++;
-        const cs = Math.min(Math.max(cell.colSpan || 1, 1), 100);
-        const rs = Math.min(Math.max(cell.rowSpan || 1, 1), 200);
-        for (let i = 0; i < rs && r + i < rowInfos.length + rs; i++) {
+        // A span can never reach past the table it is in. Clamping to what
+        // is actually there keeps the grid at rows×cols instead of letting
+        // rowspan="65534" on a wide table allocate millions of slots.
+        const cs = Math.min(Math.max(cell.colSpan || 1, 1), MAX_COLSPAN);
+        const rs = Math.min(Math.max(cell.rowSpan || 1, 1), rowInfos.length - r);
+        for (let i = 0; i < rs; i++) {
           grid[r + i] = grid[r + i] || [];
           for (let j = 0; j < cs; j++) {
             grid[r + i][c + j] = (i === 0 && j === 0) ? { cell } : { spanned: true };
@@ -1110,7 +1268,7 @@
     const caption = table.querySelector(':scope > caption');
     if (caption) {
       const t = renderInline(effectiveChildren(caption), ctx).trim();
-      if (t) blocks.push({ md: '**' + t + '**', kind: 'para' });
+      if (t) blocks.push({ md: decorate(t, '**'), kind: 'para' });
     }
     blocks.push({ md: lines.join('\n'), kind: 'table' });
     return blocks;
@@ -1182,6 +1340,7 @@
       inCell: false,
       warnings: [],
       guard: { n: 0 },
+      budget: { nodes: 0, deadline: Date.now() + MAX_MS, stopped: null },
     };
     const list = Array.isArray(nodes) ? nodes : [nodes];
     const expanded = [];
@@ -1200,13 +1359,14 @@
     _internals: {
       escapeInlineText, guardLineStart, normalizeLang, detectLang,
       pickFromSrcset, cleanTex, tidyTex, fenceFor, effectiveChildren,
+      wrapEmphasis, decorate,
     },
   });
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       escapeInlineText, guardLineStart, normalizeLang, pickFromSrcset,
-      cleanTex, tidyTex, fenceFor,
+      cleanTex, tidyTex, fenceFor, wrapEmphasis, decorate, cleanText,
     };
   }
 })(globalThis);

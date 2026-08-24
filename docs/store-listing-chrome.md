@@ -50,4 +50,4 @@ that matter: **Store listing**, **Privacy**, and **Distribution**.
 > All conversion is local. The extension contains zero network-capable API calls
 > (mechanically audited in CI: scripts/check-no-network.sh) and requests no host
 > permissions. Injection happens only on user gesture via activeTab. Public source:
-> https://github.com/<your-username>/downright
+> https://github.com/jayasankarmr/Downright
