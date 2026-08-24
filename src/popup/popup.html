@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Downright</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../icons/icon-32.png" alt="" width="20" height="20">
+    <span class="brand">Downright</span>
+    <div class="seg" role="group" aria-label="Capture mode">
+      <button id="mode-article" class="seg-btn" title="Just the article — navigation and chrome stripped">Article</button>
+      <button id="mode-full" class="seg-btn" title="Everything on the page">Full page</button>
+    </div>
+    <button id="open-options" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+  </header>
+
+  <div id="selection-note" class="note" hidden>
+    Clipping your <strong>selection</strong>.
+    <button id="clip-whole" class="link-btn">Clip whole page instead</button>
+  </div>
+
+  <div id="error" class="error" hidden>
+    <p id="error-text">Downright can’t run on this page.</p>
+    <p class="error-sub">Browser pages, the extension store, and some PDF viewers are off-limits to extensions.</p>
+  </div>
+
+  <textarea id="preview" readonly spellcheck="false" placeholder="Converting…"></textarea>
+
+  <footer>
+    <span id="stats" class="stats"></span>
+    <span class="spacer"></span>
+    <button id="save" class="btn" title="Download as a .md file">Save .md</button>
+    <button id="copy" class="btn primary" title="Copy Markdown to clipboard">Copy</button>
+  </footer>
+
+  <script src="../common/defaults.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Downright settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../icons/icon-48.png" alt="" width="28" height="28">
+      <h1>Downright settings</h1>
+      <span id="saved" class="saved" hidden>Saved ✓</span>
+    </header>
+
+    <section>
+      <h2>Capture</h2>
+      <label class="row">
+        <span>Default mode</span>
+        <select id="mode">
+          <option value="article">Article — main content only</option>
+          <option value="full">Full page — everything</option>
+        </select>
+      </label>
+      <p class="hint">Selecting text first always clips just the selection, whatever the mode.</p>
+      <label class="row check">
+        <input type="checkbox" id="images">
+        <span>Include images (<code>![alt](url)</code>) — untick to keep alt text only</span>
+      </label>
+      <label class="row check">
+        <input type="checkbox" id="toast">
+        <span>Show the “Copied” toast on the page after keyboard or right-click clips</span>
+      </label>
+    </section>
+
+    <section>
+      <h2>Front matter</h2>
+      <label class="row check">
+        <input type="checkbox" id="frontmatter">
+        <span>Start every clip with a YAML front matter block</span>
+      </label>
+      <div id="fm-fields" class="indent">
+        <label class="row check"><input type="checkbox" id="fmTitle"><span>Title</span></label>
+        <label class="row check"><input type="checkbox" id="fmSource"><span>Source URL</span></label>
+        <label class="row check"><input type="checkbox" id="fmAuthor"><span>Author</span></label>
+        <label class="row check"><input type="checkbox" id="fmPublished"><span>Published date</span></label>
+        <label class="row check"><input type="checkbox" id="fmDescription"><span>Description</span></label>
+        <label class="row check"><input type="checkbox" id="fmClipped"><span>Clipped date</span></label>
+      </div>
+      <label class="row check">
+        <input type="checkbox" id="titleHeading">
+        <span>When front matter is off, put the page title as a <code># heading</code> instead</span>
+      </label>
+    </section>
+
+    <section>
+      <h2>Files</h2>
+      <label class="row">
+        <span>Download filename</span>
+        <input type="text" id="filenameTemplate" spellcheck="false">
+      </label>
+      <p class="hint">Placeholders: <code>{title}</code> <code>{date}</code> <code>{domain}</code> — “.md” is added automatically.</p>
+    </section>
+
+    <section>
+      <h2>Keyboard shortcut</h2>
+      <p class="hint">
+        Copy page as Markdown: <kbd>Alt</kbd>+<kbd>M</kbd> by default (<kbd>Option</kbd>+<kbd>M</kbd> on Mac).
+        Change it under <code>chrome://extensions/shortcuts</code> (Chrome/Edge) or
+        Add-ons Manager → gear → “Manage Extension Shortcuts” (Firefox).
+      </p>
+    </section>
+
+    <section>
+      <h2>Privacy</h2>
+      <p class="hint">
+        Downright makes <strong>no network requests</strong> — nothing you clip ever leaves this browser.
+        Settings sync through your browser profile. That is the whole story, and the
+        <a id="repo-link" href="https://github.com/REPLACE-ME/downright" target="_blank" rel="noreferrer">source code</a> is public so you can check.
+      </p>
+    </section>
+
+    <footer>
+      <button id="reset" class="btn">Restore defaults</button>
+    </footer>
+  </main>
+
+  <script src="../common/defaults.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

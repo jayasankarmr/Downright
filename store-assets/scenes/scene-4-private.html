@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="scene-shared.css">
+  <style>
+    .stage { gap: 70px; }
+    .stage h1 { font-size: 44px; }
+    .list { display: flex; flex-direction: column; gap: 14px; margin-top: 6px; width: 480px; }
+    .item { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; }
+    .item .ic { font-size: 20px; line-height: 1.2; }
+    .item b { display: block; font-size: 15.5px; margin-bottom: 3px; }
+    .item span { font-size: 13.5px; color: #94a3b8; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="pitch">
+      <div class="brandline"><img src="../logo-300.png" alt=""><span>Downright</span></div>
+      <h1>No network.<br>No tracking.<br><span class="hl">No exceptions.</span></h1>
+      <p class="sub">The code contains zero network calls — verified by an automated audit
+      on every release — and the source is public on GitHub so you can check.</p>
+    </div>
+    <div class="list">
+      <div class="card item"><div class="ic">🔒</div><div>
+        <b>Can’t read pages in the background</b>
+        <span>No host permissions. Downright only sees a page at the moment you press the
+        shortcut or click the button — never before, never after.</span>
+      </div></div>
+      <div class="card item"><div class="ic">📴</div><div>
+        <b>Everything happens on your machine</b>
+        <span>Conversion, token estimates, downloads — all local. Nothing you clip ever
+        leaves this browser.</span>
+      </div></div>
+      <div class="card item"><div class="ic">🧾</div><div>
+        <b>Four small permissions, in plain words</b>
+        <span>Run on the tab you invoke it on · write to your clipboard · remember your
+        settings · add the right-click menu. That’s the whole list.</span>
+      </div></div>
+    </div>
+  </div>
+</body>
+</html>

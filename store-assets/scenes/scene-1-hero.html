@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="scene-shared.css">
+</head>
+<body>
+  <div class="stage">
+    <div class="pitch">
+      <div class="brandline"><img src="../logo-300.png" alt=""><span>Downright</span></div>
+      <h1>Any page →<br><span class="hl">downright correct</span> Markdown</h1>
+      <p class="sub">One keystroke turns the page you’re reading into clean Markdown on your
+      clipboard — ready to paste into ChatGPT, Claude, Obsidian, or a doc.</p>
+      <div class="chips">
+        <span class="chip">Alt+M to copy</span>
+        <span class="chip">Right-click a selection</span>
+        <span class="chip">Save as .md</span>
+      </div>
+    </div>
+    <div class="card popup">
+      <div class="p-head">
+        <img src="../logo-300.png" alt=""><span class="b">Downright</span>
+        <span class="seg"><i class="on">Article</i><i>Full page</i></span>
+        <span class="gear">⚙</span>
+      </div>
+      <pre class="mono"><span class="tok-fm">---
+title: "tf–idf"
+source: "https://en.wikipedia.org/wiki/Tf–idf"
+clipped: 2026-08-25
+---</span>
+
+<span class="tok-h"># tf–idf</span>
+
+In <span class="tok-link">[information retrieval](https://en.wikipedia.org/…)</span>,
+<span class="tok-b">**tf–idf**</span> is a measure of importance of a word
+to a document in a collection, adjusted for the
+fact that some words appear more frequently.
+
+<span class="tok-h">## Term frequency</span>
+
+Term frequency, tf(*t*,*d*), is the relative
+frequency of term *t* within document *d*,
+
+<span class="tok-math">$\mathrm{tf}(t,d) = \frac{f_{t,d}}{\sum_{t' \in d} f_{t',d}}$</span>
+
+<span class="tok-tbl">| weighting scheme | tf weight |
+| --- | --- |
+| binary | 0, 1 |
+| raw count | $f_{t,d}$ |
+| log normalization | $\log(1 + f_{t,d})$ |</span></pre>
+      <div class="p-foot">
+        <span class="stats">≈ 8.6k tokens · 34,249 chars</span>
+        <span class="sp"></span>
+        <span class="btn">Save .md</span>
+        <span class="btn pri">Copy</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="scene-shared.css">
+  <style>
+    .stage { flex-direction: column; gap: 30px; align-items: flex-start; }
+    .stage h1 { font-size: 40px; }
+    .cols { display: flex; gap: 24px; width: 100%; align-items: stretch; }
+    .col { flex: 1; }
+    .col .label { font-size: 13px; font-weight: 700; text-transform: uppercase;
+                  letter-spacing: 0.06em; color: #64748b; margin-bottom: 10px; }
+    .panel { padding: 18px; height: 340px; }
+    table { border-collapse: collapse; font-size: 14px; width: 100%; color: #cbd5e1; }
+    th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; }
+    th { background: #1e293b; }
+    .panel pre { font-size: 13.5px; line-height: 1.65; color: #cbd5e1; }
+    .arrow { font-size: 34px; color: #6366f1; align-self: center; }
+    .footnote { color: #94a3b8; font-size: 15.5px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div>
+      <h1>Tables survive the trip — <span class="hl">spans and all</span></h1>
+      <p class="footnote">Real GFM pipe tables out of real-world HTML: merged cells, alignment,
+      headers, pipes in content. The thing every other clipper gets wrong.</p>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <div class="label">The page</div>
+        <div class="card panel">
+          <table>
+            <tr><th>Name</th><th colspan="2">Contact</th></tr>
+            <tr><td>Ada</td><td>ada@example.com</td><td rowspan="2">Shared line</td></tr>
+            <tr><td>Grace</td><td>grace@example.com</td></tr>
+            <tr><td>Edsger</td><td>ew@example.com</td><td>Direct line</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="col">
+        <div class="label">Your clipboard</div>
+        <div class="card panel">
+          <pre class="mono"><span class="tok-tbl">| Name   | Contact           |             |
+| ------ | ----------------- | ----------- |
+| Ada    | ada@example.com   | Shared line |
+| Grace  | grace@example.com |             |
+| Edsger | ew@example.com    | Direct line |</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

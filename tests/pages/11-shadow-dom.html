@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Shadow DOM</title>
+  <base href="https://example.org/docs/page.html">
+</head>
+<body>
+  <my-card>
+    <template shadowrootmode="open">
+      <style>:host{display:block}</style>
+      <h2>Shadow Heading</h2>
+      <p>Paragraph inside the shadow root.</p>
+      <slot></slot>
+      <p>After the slot.</p>
+    </template>
+    <p>Light DOM content projected through the slot.</p>
+  </my-card>
+  <p><my-badge><template shadowrootmode="open"><span>Badge: <slot></slot></span></template>inline light text</my-badge></p>
+</body>
+</html>

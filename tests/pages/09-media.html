@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Images and media</title>
+  <base href="https://example.org/docs/page.html">
+</head>
+<body>
+  <p><img src="/img/photo.jpg" alt="A photo"></p>
+  <p><img src="https://cdn.example.com/pic.png" alt="Abs [pic]" title="Nice"></p>
+  <figure>
+    <img src="banana.jpg" alt="Banana">
+    <figcaption>A ripe banana</figcaption>
+  </figure>
+  <p><a href="/gallery"><img src="thumb.jpg" alt="Thumb"></a></p>
+  <p>Lazy: <img src="data:image/gif;base64,R0lGOD" data-src="/lazy/real.jpg" alt="Lazy img"></p>
+  <p>Srcset: <img srcset="/small.jpg 480w, /big.jpg 1200w" src="data:image/gif;base64,x" alt="Responsive"></p>
+  <p>Tracker:<img src="/pixel.gif" width="1" height="1" alt=""> end.</p>
+  <p><video src="/media/demo.mp4" title="Demo video"></video></p>
+</body>
+</html>

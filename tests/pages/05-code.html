@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Code blocks</title>
+  <base href="https://example.org/docs/page.html">
+</head>
+<body>
+  <pre><code class="language-js">const x = 1;
+console.log(x);</code></pre>
+  <div class="highlight highlight-source-python"><pre>def f():
+    return 42</pre></div>
+  <pre><code class="hljs language-rust">fn main() {}</code></pre>
+  <pre>plain text block
+no language</pre>
+  <pre><code>Fence with ``` inside</code></pre>
+  <div class="tabs">
+    <div class="tab-panel"><pre><code class="language-bash">npm install downright</code></pre></div>
+    <div class="tab-panel" hidden><pre><code class="language-powershell">choco install downright</code></pre></div>
+  </div>
+  <div class="highlight-python notranslate"><div class="highlight"><table class="highlighttable"><tr><td class="linenos"><pre>1
+2</pre></td><td class="code"><pre>import os
+print(os.name)</pre></td></tr></table></div></div>
+</body>
+</html>

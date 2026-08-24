@@ -1,0 +1,77 @@
+/* Shared styling for Downright store screenshots (rendered headless at
+ * exact store dimensions — no browser chrome). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 1280px;
+  height: 800px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  color: #e2e8f0;
+  background:
+    radial-gradient(1000px 600px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+    radial-gradient(800px 500px at -5% 110%, rgba(79, 70, 229, 0.25), transparent 55%),
+    linear-gradient(160deg, #0b1220 0%, #111633 55%, #0b1220 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage { width: 1160px; display: flex; align-items: center; gap: 56px; }
+
+.pitch { flex: 1; }
+.brandline { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+.brandline img { width: 40px; height: 40px; border-radius: 9px; }
+.brandline span { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+
+h1 { font-size: 46px; line-height: 1.12; letter-spacing: -0.025em; margin-bottom: 18px; }
+h1 .hl { color: #a5b4fc; }
+.sub { font-size: 19px; line-height: 1.55; color: #94a3b8; max-width: 460px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
+.chip {
+  font-size: 13.5px; font-weight: 600; color: #c7d2fe;
+  border: 1px solid rgba(165, 180, 252, 0.35);
+  background: rgba(99, 102, 241, 0.12);
+  padding: 6px 12px; border-radius: 999px;
+}
+
+.card {
+  background: #0f172a;
+  border: 1px solid #293548;
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Mini popup mockup */
+.popup { width: 430px; }
+.popup .p-head { display: flex; align-items: center; gap: 8px; padding: 11px 13px;
+                 border-bottom: 1px solid #293548; }
+.popup .p-head img { width: 20px; height: 20px; border-radius: 4px; }
+.popup .p-head .b { font-weight: 700; font-size: 13.5px; }
+.popup .seg { margin-left: auto; display: flex; border: 1px solid #293548;
+              border-radius: 8px; overflow: hidden; font-size: 12px; }
+.popup .seg i { font-style: normal; padding: 4px 10px; color: #94a3b8; }
+.popup .seg i.on { background: #6366f1; color: #fff; }
+.popup .gear { color: #64748b; font-size: 14px; margin-left: 6px; }
+.popup pre { font-size: 11.6px; line-height: 1.52; padding: 13px; color: #cbd5e1;
+             white-space: pre; overflow: hidden; height: 372px; }
+.popup .p-foot { display: flex; align-items: center; gap: 8px; padding: 10px 13px;
+                 border-top: 1px solid #293548; background: #111a2e; font-size: 12px; }
+.popup .stats { color: #94a3b8; }
+.popup .sp { flex: 1; }
+.popup .btn { border-radius: 8px; padding: 6px 14px; font-size: 12.5px; font-weight: 600;
+              border: 1px solid #293548; color: #e2e8f0; }
+.popup .btn.pri { background: #6366f1; border-color: #6366f1; color: #fff; }
+
+/* Markdown syntax tinting for mockup previews */
+.tok-h { color: #a5b4fc; font-weight: 700; }
+.tok-fm { color: #64748b; }
+.tok-tbl { color: #7dd3fc; }
+.tok-code { color: #86efac; }
+.tok-math { color: #fca5a5; }
+.tok-link { color: #93c5fd; }
+.tok-b { color: #f1f5f9; font-weight: 700; }

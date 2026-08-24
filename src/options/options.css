@@ -1,0 +1,94 @@
+:root {
+  --bg: #ffffff;
+  --bg-2: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #4f46e5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --bg-2: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+    --accent: #818cf8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg-2);
+}
+
+main {
+  max-width: 640px;
+  margin: 32px auto;
+  padding: 0 20px 40px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+h1 { font-size: 20px; margin: 0; }
+.saved { color: #047857; font-weight: 600; font-size: 13px; margin-left: auto; }
+
+section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-top: 14px;
+}
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;
+     color: var(--muted); margin: 0 0 12px; }
+
+.row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.row > span:first-child { min-width: 140px; }
+.row.check > span { min-width: 0; }
+.row.check { cursor: pointer; }
+
+select, input[type="text"] {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  flex: 1;
+  max-width: 320px;
+}
+input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; }
+
+.indent { margin-left: 24px; }
+.indent .row { margin: 4px 0; }
+
+.hint { color: var(--muted); font-size: 12.5px; margin: 6px 0 2px; }
+code, kbd {
+  font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+a { color: var(--accent); }
+
+footer { margin-top: 16px; }
+.btn {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }

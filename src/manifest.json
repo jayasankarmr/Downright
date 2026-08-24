@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Downright — Copy Any Page as Markdown for AI",
+  "short_name": "Downright",
+  "version": "1.0.0",
+  "description": "Copy any page as clean Markdown in one keystroke — correct tables, code fences, and math. No tracking. No network. Ever.",
+  "minimum_chrome_version": "111",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite",
+    "storage",
+    "contextMenus"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Downright — copy this page as Markdown",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "clip-copy": {
+      "suggested_key": {
+        "default": "Alt+M"
+      },
+      "description": "Copy page (or selection) as Markdown"
+    },
+    "clip-save": {
+      "description": "Save page as a .md file"
+    }
+  }
+}

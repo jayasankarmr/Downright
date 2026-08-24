@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Downright tests — loading</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           margin: 24px; color: #0f172a; background: #f8fafc; }
+    h1 { font-size: 18px; }
+    #summary { font-size: 16px; font-weight: 600; margin: 12px 0 20px; }
+    #summary.pass { color: #047857; }
+    #summary.fail { color: #b91c1c; }
+    .case { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px;
+            background: #fff; overflow: hidden; }
+    .case > .head { padding: 8px 12px; font-weight: 600; display: flex; gap: 8px; }
+    .case.pass > .head { color: #047857; }
+    .case.fail > .head { color: #b91c1c; }
+    .diff { display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+            border-top: 1px solid #e2e8f0; }
+    .diff pre { margin: 0; padding: 10px 12px; font: 12px/1.45 ui-monospace, SFMono-Regular,
+                Menlo, monospace; white-space: pre-wrap; word-break: break-word;
+                overflow-x: auto; max-height: 420px; overflow-y: auto; }
+    .diff .got { border-right: 1px solid #e2e8f0; }
+    .diff .label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+                   color: #64748b; padding: 6px 12px 0; }
+    .mismatch { background: #fef2f2; }
+  </style>
+</head>
+<body>
+  <h1>Downright conversion tests</h1>
+  <div id="summary">running…</div>
+  <div id="cases"></div>
+  <pre id="__results__" hidden></pre>
+
+  <script src="../src/common/defaults.js"></script>
+  <script src="../src/content/convert.js"></script>
+  <script src="../src/content/extract.js"></script>
+  <script src="../src/content/clip.js"></script>
+  <script src="manifest.js"></script>
+  <script>
+    const HARNESS_DEFAULTS = { frontmatter: false, fmClipped: false, titleHeading: false, toast: false };
+
+    function normalize(s) {
+      return (s || '')
+        .replace(/[ \t]+$/gm, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim() + '\n';
+    }
+
+    function applySelection(doc, spec) {
+      const range = doc.createRange();
+      if (spec.type === 'text') {
+        const startEl = doc.querySelector(spec.start);
+        const endEl = doc.querySelector(spec.end);
+        range.setStart(startEl.firstChild, spec.startOffset || 0);
+        const endNode = endEl.firstChild;
+        range.setEnd(endNode, spec.endOffset != null ? spec.endOffset : endNode.length);
+      } else {
+        range.setStartBefore(doc.querySelector(spec.start));
+        range.setEndAfter(doc.querySelector(spec.end));
+      }
+      const sel = doc.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    function firstDiffLine(a, b) {
+      const al = a.split('\n'), bl = b.split('\n');
+      for (let i = 0; i < Math.max(al.length, bl.length); i++) {
+        if (al[i] !== bl[i]) return { line: i + 1, got: al[i], want: bl[i] };
+      }
+      return null;
+    }
+
+    async function runCase(c) {
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'width:1000px;height:800px;position:absolute;left:-2000px;top:0;';
+      document.body.appendChild(iframe);
+      try {
+        await new Promise((res, rej) => {
+          iframe.onload = res;
+          iframe.onerror = () => rej(new Error('page failed to load'));
+          iframe.src = 'pages/' + c.page;
+        });
+        const doc = iframe.contentDocument;
+        if (c.select) applySelection(doc, c.select);
+        const settings = Object.assign({}, HARNESS_DEFAULTS, c.settings || {});
+        const res = await window.__downright.clip({ mode: c.mode, document: doc, settings });
+        if (!res.ok) throw new Error(res.error || 'clip failed');
+        const resp = await fetch('expected/' + (c.expected || c.id + '.md'));
+        if (!resp.ok) throw new Error('missing expected file');
+        const expected = await resp.text();
+        const got = normalize(res.markdown);
+        const want = normalize(expected);
+        return { id: c.id, pass: got === want, got, want, warnings: res.warnings };
+      } catch (e) {
+        return { id: c.id, pass: false, got: 'ERROR: ' + (e && e.stack || e), want: '', error: true };
+      } finally {
+        iframe.remove();
+      }
+    }
+
+    function render(results) {
+      const casesEl = document.getElementById('cases');
+      casesEl.textContent = '';
+      for (const r of results) {
+        const div = document.createElement('div');
+        div.className = 'case ' + (r.pass ? 'pass' : 'fail');
+        const head = document.createElement('div');
+        head.className = 'head';
+        head.textContent = (r.pass ? '✓ ' : '✗ ') + r.id +
+          (r.warnings && r.warnings.length ? '   [warnings: ' + r.warnings.join(', ') + ']' : '');
+        div.appendChild(head);
+        if (!r.pass) {
+          const diff = document.createElement('div');
+          diff.className = 'diff';
+          const mk = (label, text, cls) => {
+            const wrap = document.createElement('div');
+            wrap.className = cls;
+            const l = document.createElement('div');
+            l.className = 'label';
+            l.textContent = label;
+            const pre = document.createElement('pre');
+            pre.textContent = text;
+            wrap.append(l, pre);
+            return wrap;
+          };
+          diff.append(mk('got', r.got, 'got'), mk('want', r.want, 'want'));
+          div.appendChild(diff);
+        }
+        casesEl.appendChild(div);
+      }
+    }
+
+    async function main() {
+      const results = [];
+      for (const c of window.TEST_CASES) {
+        results.push(await runCase(c));
+      }
+      const passed = results.filter((r) => r.pass).length;
+      const total = results.length;
+      const ok = passed === total;
+      const summaryEl = document.getElementById('summary');
+      summaryEl.textContent = (ok ? 'PASS' : 'FAIL') + ' — ' + passed + '/' + total + ' cases';
+      summaryEl.className = ok ? 'pass' : 'fail';
+      document.title = (ok ? 'PASS' : 'FAIL') + ' ' + passed + '/' + total;
+      render(results);
+      const payload = {
+        passed, total,
+        failures: results.filter((r) => !r.pass).map((r) => ({
+          id: r.id,
+          firstDiff: r.error ? null : firstDiffLine(r.got, r.want),
+          error: r.error ? r.got.slice(0, 600) : undefined,
+        })),
+      };
+      const resEl = document.getElementById('__results__');
+      resEl.textContent = 'DOWNRIGHT_RESULTS:' + JSON.stringify(payload);
+      resEl.hidden = false;
+      resEl.style.display = 'none';
+    }
+
+    main().catch((e) => {
+      document.title = 'FAIL harness-error';
+      document.getElementById('summary').textContent = 'Harness error: ' + (e && e.stack || e);
+      document.getElementById('__results__').textContent =
+        'DOWNRIGHT_RESULTS:' + JSON.stringify({ passed: 0, total: 0, harnessError: String(e && e.stack || e) });
+    });
+  </script>
+</body>
+</html>

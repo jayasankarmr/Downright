@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>useQuery API | DataFetch Docs</title>
+  <meta property="og:site_name" content="DataFetch Docs">
+  <meta property="og:title" content="useQuery">
+  <base href="https://docs.datafetch.dev/api/use-query">
+</head>
+<body>
+  <header class="site-header"><nav>Docs nav</nav></header>
+  <aside class="sidebar">Sidebar links</aside>
+  <main>
+    <article class="markdown-body">
+      <h1>useQuery</h1>
+      <p>The <code>useQuery</code> hook fetches, caches, and updates data in your components. It accepts a key, a fetcher function, and an options object, and returns the current state of the request together with helpers for refetching and invalidation whenever your inputs change.</p>
+      <div class="admonition note"><p class="admonition-title">Note</p><p>Keys must be stable across renders.</p></div>
+      <h2 id="usage">Usage <a class="hash-link" href="#usage">#</a></h2>
+      <div class="tabs">
+        <button role="tab">npm</button><button role="tab">yarn</button>
+        <div role="tabpanel"><pre><code class="language-bash">npm install datafetch</code></pre></div>
+        <div role="tabpanel" hidden><pre><code class="language-bash">yarn add datafetch</code></pre></div>
+      </div>
+      <p>Then wire it up:</p>
+      <pre><code class="language-tsx">const { data, error } = useQuery(['todos'], fetchTodos);</code></pre>
+      <h2 id="options">Options <a class="hash-link" href="#options">#</a></h2>
+      <table>
+        <thead><tr><th>Option</th><th>Type</th><th>Default</th></tr></thead>
+        <tbody>
+          <tr><td><code>retry</code></td><td><code>number | boolean</code></td><td><code>3</code></td></tr>
+          <tr><td><code>staleTime</code></td><td><code>number</code></td><td><code>0</code></td></tr>
+        </tbody>
+      </table>
+      <blockquote><p>Set <code>staleTime</code> to <code>Infinity</code> for immutable data.</p></blockquote>
+    </article>
+  </main>
+  <footer class="site-footer">Footer</footer>
+</body>
+</html>

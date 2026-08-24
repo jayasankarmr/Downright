@@ -1,0 +1,6 @@
+dist/
+tests/live/
+.DS_Store
+node_modules/
+*.crx
+*.pem
