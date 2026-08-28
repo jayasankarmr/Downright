@@ -90,7 +90,7 @@ character limit, the text is already inside it.
 
 ## Package
 
-- Upload `dist/downright-1.0.0-chromium.zip` (run `bash scripts/build.sh` first).
+- Upload `dist/downright-1.0.1-chromium.zip` (run `bash scripts/build.sh` first).
 
 ## Certification notes (the "Notes for certification" box)
 

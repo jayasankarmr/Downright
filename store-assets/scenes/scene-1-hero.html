@@ -1,60 +1,150 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="scene-shared.css">
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #17140F; color: #F4EFE6;
+         font-family: "Bricolage Grotesque", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .stage { width: 1280px; height: 800px; display: flex; overflow: hidden; }
+  .hl { color: #6E92D8; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  .brandline { display: flex; align-items: center; gap: 14px; }
+  .brandline .n { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .card { background: #211D16; border: 1px solid #342F26; border-radius: 14px; }
+  pre { margin: 0; }
+  .stage { gap: 52px; padding: 56px 64px; }
+  .pitch { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
+  h1 { margin: 0; font-size: 66px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.06; }
+  .sub { font-size: 23px; line-height: 1.5; color: #B9B0A0; max-width: 500px; }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 500; color: #6E92D8;
+          border: 1px solid rgba(110,146,216,0.4); background: rgba(45,93,174,0.14);
+          padding: 8px 15px; border-radius: 999px; }
+  .popup { width: 470px; flex: none; display: flex; flex-direction: column;
+           box-shadow: 0 30px 80px rgba(0,0,0,0.5); overflow: hidden; }
+  .p-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+            border-bottom: 1px solid #342F26; }
+  .p-head .b { font-weight: 700; font-size: 16px; }
+  .seg { margin-left: auto; display: flex; border: 1px solid #342F26; border-radius: 8px;
+         overflow: hidden; font-size: 13.5px; }
+  .seg span { padding: 5px 12px; color: #9C9384; }
+  .seg span.on { background: #6E92D8; color: #17140F; }
+  .more { color: #6B6355; font-size: 16px; letter-spacing: 0.1em; }
+  .p-body { flex: 1; font-family: "IBM Plex Mono", monospace; font-size: 13px; line-height: 1.6;
+            padding: 16px; color: #CFC7B7; overflow: hidden; white-space: pre; }
+  .p-foot { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+            border-top: 1px solid #342F26; background: #17140F; font-size: 14px; }
+  .p-foot .stats { color: #9C9384; }
+  .p-foot .sp { flex: 1; }
+  .btn { border: 1px solid #342F26; border-radius: 8px; padding: 7px 15px; font-weight: 600; }
+  .btn.pri { background: #6E92D8; border-color: #6E92D8; color: #17140F; }
+  .fm { color: #6B6355; }
+  .h { color: #6E92D8; font-weight: 700; }
+  .lk { color: #6E92D8; }
+  .b { color: #F4EFE6; font-weight: 700; }
+  .acc { color: #DA8A5C; }
+</style>
 </head>
 <body>
-  <div class="stage">
-    <div class="pitch">
-      <div class="brandline"><img src="../logo-300.png" alt=""><span>Downright</span></div>
-      <h1>Any page →<br><span class="hl">downright correct</span> Markdown</h1>
-      <p class="sub">One keystroke turns the page you’re reading into clean Markdown on your
-      clipboard — ready to paste into ChatGPT, Claude, Obsidian, or a doc.</p>
-      <div class="chips">
-        <span class="chip">Alt+M to copy</span>
-        <span class="chip">Right-click a selection</span>
-        <span class="chip">Save as .md</span>
-      </div>
+<div class="stage">
+  <div class="pitch">
+    <div class="brandline"><svg width="52" height="52" viewBox="0 0 100 100" style="flex:none;">
+    <defs><filter id="rb" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.038" numOctaves="3" seed="41" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter></defs>
+    <rect x="2" y="2" width="96" height="96" rx="16" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+    <g transform="translate(12 12) scale(0.76)"><g filter="url(#rb)">
+      <g transform="rotate(-13 55 27)">
+        <rect x="24" y="4" width="62" height="44" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+        <rect x="32" y="13" width="26" height="3.8" fill="#17140F"/>
+        <rect x="32" y="23" width="46" height="3.8" fill="#2D5DAE"/>
+        <rect x="32" y="33" width="34" height="3.8" fill="#17140F"/>
+      </g>
+      <path d="M60 58 L54 45 M72 57 L79 45" stroke="#17140F" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+      <path d="M36 84 L26 95 M48 82 L46 97 M58 80 L68 94" stroke="#17140F" stroke-width="4.4" stroke-linecap="round" fill="none"/>
+      <ellipse cx="24" cy="76" rx="16" ry="12.5" transform="rotate(-8 24 76)" fill="#17140F"/>
+      <ellipse cx="38" cy="75" rx="5.5" ry="4.5" fill="#17140F"/>
+      <ellipse cx="50" cy="72" rx="11" ry="9.5" fill="#17140F"/>
+      <path d="M77 62 L88 66 L77 71 Z" fill="#17140F"/>
+      <circle cx="68" cy="67" r="10.5" fill="#17140F"/>
+      <circle cx="71" cy="63.5" r="3" fill="#F4EFE6"/>
+    </g></g>
+  </svg><span class="n">Downright</span></div>
+    <h1>Any page →<br><span class="hl">downright correct</span> Markdown</h1>
+    <div class="sub">One keystroke turns the page you’re reading into clean Markdown on your
+      clipboard — ready to paste into ChatGPT, Claude, Obsidian, or a doc.</div>
+    <div class="chips">
+      <span class="chip">Alt+M to copy</span>
+      <span class="chip">Right-click a selection</span>
+      <span class="chip">Save as .md</span>
     </div>
-    <div class="card popup">
-      <div class="p-head">
-        <img src="../logo-300.png" alt=""><span class="b">Downright</span>
-        <span class="seg"><i class="on">Article</i><i>Full page</i></span>
-        <span class="gear">⚙</span>
-      </div>
-      <pre class="mono"><span class="tok-fm">---
+  </div>
+  <div class="card popup">
+    <div class="p-head">
+      <svg width="26" height="26" viewBox="0 0 100 100" style="flex:none;">
+    <defs><filter id="rp" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.038" numOctaves="3" seed="41" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter></defs>
+    <rect x="2" y="2" width="96" height="96" rx="16" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+    <g transform="translate(12 12) scale(0.76)"><g filter="url(#rp)">
+      <g transform="rotate(-13 55 27)">
+        <rect x="24" y="4" width="62" height="44" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+        <rect x="32" y="13" width="26" height="3.8" fill="#17140F"/>
+        <rect x="32" y="23" width="46" height="3.8" fill="#2D5DAE"/>
+        <rect x="32" y="33" width="34" height="3.8" fill="#17140F"/>
+      </g>
+      <path d="M60 58 L54 45 M72 57 L79 45" stroke="#17140F" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+      <path d="M36 84 L26 95 M48 82 L46 97 M58 80 L68 94" stroke="#17140F" stroke-width="4.4" stroke-linecap="round" fill="none"/>
+      <ellipse cx="24" cy="76" rx="16" ry="12.5" transform="rotate(-8 24 76)" fill="#17140F"/>
+      <ellipse cx="38" cy="75" rx="5.5" ry="4.5" fill="#17140F"/>
+      <ellipse cx="50" cy="72" rx="11" ry="9.5" fill="#17140F"/>
+      <path d="M77 62 L88 66 L77 71 Z" fill="#17140F"/>
+      <circle cx="68" cy="67" r="10.5" fill="#17140F"/>
+      <circle cx="71" cy="63.5" r="3" fill="#F4EFE6"/>
+    </g></g>
+  </svg><span class="b">Downright</span>
+      <span class="seg"><span class="on">Article</span><span>Full page</span></span>
+      <span class="more mono">···</span>
+    </div>
+    <pre class="p-body"><span class="fm">---
 title: "tf–idf"
 source: "https://en.wikipedia.org/wiki/Tf–idf"
-clipped: 2026-08-25
+clipped: 2026-08-28
 ---</span>
 
-<span class="tok-h"># tf–idf</span>
+<span class="h"># tf–idf</span>
 
-In <span class="tok-link">[information retrieval](https://en.wikipedia.org/…)</span>,
-<span class="tok-b">**tf–idf**</span> is a measure of importance of a word
-to a document in a collection, adjusted for the
-fact that some words appear more frequently.
+In <span class="lk">[information retrieval](https://en.wikipedia…)</span>,
+<span class="b">**tf–idf**</span> is a measure of importance of a
+word to a document in a collection, adjusted
+for the fact that some words appear more
+frequently.
 
-<span class="tok-h">## Term frequency</span>
+<span class="h">## Term frequency</span>
 
 Term frequency, tf(*t*,*d*), is the relative
 frequency of term *t* within document *d*,
 
-<span class="tok-math">$\mathrm{tf}(t,d) = \frac{f_{t,d}}{\sum_{t' \in d} f_{t',d}}$</span>
+<span class="acc">$\mathrm{tf}(t,d) = f_{t,d} / \sum f_{t',d}$</span>
 
-<span class="tok-tbl">| weighting scheme | tf weight |
-| --- | --- |
-| binary | 0, 1 |
-| raw count | $f_{t,d}$ |
-| log normalization | $\log(1 + f_{t,d})$ |</span></pre>
-      <div class="p-foot">
-        <span class="stats">≈ 8.6k tokens · 34,249 chars</span>
-        <span class="sp"></span>
-        <span class="btn">Save .md</span>
-        <span class="btn pri">Copy</span>
-      </div>
+<span class="acc">| weighting scheme  | tf weight        |
+| ----------------- | ---------------- |
+| binary            | 0, 1             |
+| raw count         | $f_{t,d}$        |</span></pre>
+    <div class="p-foot">
+      <span class="stats">≈ 8.6k tokens · 34,249 chars</span>
+      <span class="sp"></span>
+      <span class="btn">Save .md</span>
+      <span class="btn pri">Copy</span>
     </div>
   </div>
+</div>
 </body>
 </html>

@@ -43,7 +43,7 @@ that matter: **Store listing**, **Privacy**, and **Distribution**.
 
 ## Package
 
-- Upload `dist/downright-1.0.0-chromium.zip`.
+- Upload `dist/downright-1.0.1-chromium.zip`.
 
 ## Review notes
 

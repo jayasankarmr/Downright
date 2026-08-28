@@ -4,29 +4,32 @@
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,800&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  body {
-    width: 440px; height: 280px; overflow: hidden;
-    background: #17140F;
-    font-family: "Bricolage Grotesque", sans-serif;
-    display: flex; align-items: center; gap: 20px; padding: 0 34px; position: relative;
-  }
-  .rule { position: absolute; left: 0; right: 0; top: 0; height: 9px;
+  body { width: 440px; height: 280px; overflow: hidden;
+         background: #17140F;
+         font-family: "Bricolage Grotesque", sans-serif;
+         display: flex; flex-direction: column; }
+  .rule { flex: none; height: 9px;
           background: repeating-linear-gradient(90deg, #17140F 0 9px, transparent 9px 18px); }
-  .medallion { background: #F4EFE6; border-radius: 22px; width: 148px; height: 148px;
+  .main { flex: 1; display: flex; align-items: center; gap: 18px; padding: 0 24px; }
+  .medallion { background: #F4EFE6; border-radius: 20px; width: 150px; height: 150px;
                display: flex; align-items: center; justify-content: center; flex: none; }
-  .name { font-size: 38px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;
-          color: #F4EFE6; }
-  .sub { font-family: "IBM Plex Mono", monospace; font-size: 12px; line-height: 1.55;
-         color: #B9B0A0; }
   .copy { display: flex; flex-direction: column; gap: 9px; }
+  .name { font-size: 44px; font-weight: 800; letter-spacing: -0.045em; line-height: 1;
+          color: #F4EFE6; }
+  .sub { font-family: "IBM Plex Mono", monospace; font-size: 13.5px; line-height: 1;
+         color: #B9B0A0; }
+  .bar { flex: none; font-family: "IBM Plex Mono", monospace; font-size: 13.5px;
+         letter-spacing: 0.02em; padding: 12px 24px;
+         background: #F4EFE6; color: #17140F; }
 </style>
 </head>
 <body>
-<div class="medallion"><svg width="124" height="124" viewBox="0 0 100 100" style="flex:none;">
+<div class="main">
+  <div class="medallion"><svg width="128" height="128" viewBox="0 0 100 100" style="flex:none;">
     <defs><filter id="r" x="-12%" y="-12%" width="124%" height="124%">
       <feTurbulence type="fractalNoise" baseFrequency="0.038" numOctaves="3" seed="41" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
@@ -50,7 +53,9 @@
   </svg></div>
   <div class="copy">
     <div class="name">Downright</div>
-    <div class="sub">any page → correct Markdown<br>nothing sent, nothing stored</div>
+    <div class="sub">any page → correct Markdown</div>
   </div>
+</div>
+<div class="bar">nothing sent · nothing stored</div>
 </body>
 </html>

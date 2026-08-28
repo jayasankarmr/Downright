@@ -4,7 +4,7 @@ AMO's submission flow is the shortest of the three. Developer accounts are free.
 
 ## Upload
 
-- Upload `dist/downright-1.0.0-firefox.zip` (built by `bash scripts/build.sh`).
+- Upload `dist/downright-1.0.1-firefox.zip` (built by `bash scripts/build.sh`).
 - **Source code submission**: not required — the package ships plain, unminified
   source. If the reviewer asks anyway, point at the public GitHub repository.
 - The manifest already declares `data_collection_permissions: { required: ["none"] }`,
