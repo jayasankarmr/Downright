@@ -1,6 +1,28 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 — 28 August 2026
+
+- **New store screenshots and promo tile**: larger type, content filling the frame, and
+  the privacy screen's emoji icons replaced with numbered ink stamps.
+- Scene pages are now self-contained; `store-assets/scenes/scene-shared.css` removed.
+
+No functional changes — conversion, permissions, and the zero-network guarantee are
+untouched.
+
+## 1.0.0 — 25 August 2026
+
+First release.
+
+- One-keystroke clip (`Alt+M`): article → clean GFM on the clipboard; selection-aware.
+- Right-click menu: copy selection, copy page, save page as `.md`.
+- Popup with live preview, Article/Full-page toggle, token estimate, copy & save.
+- Converter: GFM tables with colspan/rowspan grid placement; code fences with language
+  inference (Prism/Shiki/highlight.js/GitHub); KaTeX/MathJax/MediaWiki/MathML → LaTeX;
+  absolute URLs (lazy images and srcset included); Shadow DOM + `<slot>` flattening;
+  selection context re-wrapping (list numbering, table headers, code fencing).
+- Readability-style article extraction with metadata (title, author, published, site).
+- Optional YAML front matter; download filename templates.
+- Zero dependencies, no network access, no host permissions.
 
 Interface:
 
@@ -68,7 +90,7 @@ Conversion fixes, found by clipping dense Wikipedia articles:
 - `utm_*` analytics parameters are stripped from every resolved URL; Wikipedia's
   Parsoid HTML stamps them onto each thumbnail and they carried into clips.
 
-Hardening, from a security review of the 1.0.0 code:
+Hardening, from a security review of the initial code:
 
 - **Hidden text is no longer clipped.** A clip is bound for an AI chat, so text a page
   hides from the reader is a way to smuggle instructions past them. Elements hidden by
@@ -100,18 +122,3 @@ Hardening, from a security review of the 1.0.0 code:
   objects, dynamic `import()`, `navigator.sendBeacon`/`serviceWorker`, `window.open`,
   absolute URL string literals, off-device markup references, and preload hints — not
   just the literal word `fetch`.
-
-## 1.0.0 — 25 August 2026
-
-First release.
-
-- One-keystroke clip (`Alt+M`): article → clean GFM on the clipboard; selection-aware.
-- Right-click menu: copy selection, copy page, save page as `.md`.
-- Popup with live preview, Article/Full-page toggle, token estimate, copy & save.
-- Converter: GFM tables with colspan/rowspan grid placement; code fences with language
-  inference (Prism/Shiki/highlight.js/GitHub); KaTeX/MathJax/MediaWiki/MathML → LaTeX;
-  absolute URLs (lazy images and srcset included); Shadow DOM + `<slot>` flattening;
-  selection context re-wrapping (list numbering, table headers, code fencing).
-- Readability-style article extraction with metadata (title, author, published, site).
-- Optional YAML front matter; download filename templates.
-- Zero dependencies, no network access, no host permissions.

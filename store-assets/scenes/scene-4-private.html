@@ -1,43 +1,88 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="scene-shared.css">
-  <style>
-    .stage { gap: 70px; }
-    .stage h1 { font-size: 44px; }
-    .list { display: flex; flex-direction: column; gap: 14px; margin-top: 6px; width: 480px; }
-    .item { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; }
-    .item .ic { font-size: 20px; line-height: 1.2; }
-    .item b { display: block; font-size: 15.5px; margin-bottom: 3px; }
-    .item span { font-size: 13.5px; color: #9C9384; line-height: 1.5; }
-  </style>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #17140F; color: #F4EFE6;
+         font-family: "Bricolage Grotesque", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .stage { width: 1280px; height: 800px; display: flex; overflow: hidden; }
+  .hl { color: #6E92D8; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  .brandline { display: flex; align-items: center; gap: 14px; }
+  .brandline .n { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .card { background: #211D16; border: 1px solid #342F26; border-radius: 14px; }
+  pre { margin: 0; }
+  .stage { align-items: center; gap: 60px; padding: 56px 64px; }
+  .pitch { flex: 1; display: flex; flex-direction: column; gap: 26px; }
+  h1 { margin: 0; font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
+  .sub { font-size: 21px; line-height: 1.5; color: #B9B0A0; max-width: 460px; }
+  .list { width: 540px; flex: none; display: flex; flex-direction: column; gap: 18px; }
+  .item { padding: 22px 24px; display: flex; gap: 18px; align-items: flex-start; }
+  .item .ic { width: 42px; height: 42px; flex: none; background: #17140F; border: 1px solid #342F26;
+              border-radius: 8px; display: flex; align-items: center; justify-content: center;
+              font-size: 16px; color: #6E92D8; }
+  .item b { display: block; font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+  .item span { font-size: 16.5px; color: #9C9384; line-height: 1.5; }
+</style>
 </head>
 <body>
-  <div class="stage">
-    <div class="pitch">
-      <div class="brandline"><img src="../logo-300.png" alt=""><span>Downright</span></div>
-      <h1>No network.<br>No tracking.<br><span class="hl">No exceptions.</span></h1>
-      <p class="sub">The code contains zero network calls — verified by an automated audit
-      on every release — and the source is public on GitHub so you can check.</p>
-    </div>
-    <div class="list">
-      <div class="card item"><div class="ic">🔒</div><div>
-        <b>Can’t read pages in the background</b>
-        <span>No host permissions. Downright only sees a page at the moment you press the
-        shortcut or click the button — never before, never after.</span>
-      </div></div>
-      <div class="card item"><div class="ic">📴</div><div>
-        <b>Everything happens on your machine</b>
-        <span>Conversion, token estimates, downloads — all local. Nothing you clip ever
-        leaves this browser.</span>
-      </div></div>
-      <div class="card item"><div class="ic">🧾</div><div>
-        <b>Four small permissions, in plain words</b>
-        <span>Run on the tab you invoke it on · write to your clipboard · remember your
-        settings · add the right-click menu. That’s the whole list.</span>
-      </div></div>
-    </div>
+<div class="stage">
+  <div class="pitch">
+    <div class="brandline"><svg width="52" height="52" viewBox="0 0 100 100" style="flex:none;">
+    <defs><filter id="rb" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.038" numOctaves="3" seed="41" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter></defs>
+    <rect x="2" y="2" width="96" height="96" rx="16" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+    <g transform="translate(12 12) scale(0.76)"><g filter="url(#rb)">
+      <g transform="rotate(-13 55 27)">
+        <rect x="24" y="4" width="62" height="44" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+        <rect x="32" y="13" width="26" height="3.8" fill="#17140F"/>
+        <rect x="32" y="23" width="46" height="3.8" fill="#2D5DAE"/>
+        <rect x="32" y="33" width="34" height="3.8" fill="#17140F"/>
+      </g>
+      <path d="M60 58 L54 45 M72 57 L79 45" stroke="#17140F" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+      <path d="M36 84 L26 95 M48 82 L46 97 M58 80 L68 94" stroke="#17140F" stroke-width="4.4" stroke-linecap="round" fill="none"/>
+      <ellipse cx="24" cy="76" rx="16" ry="12.5" transform="rotate(-8 24 76)" fill="#17140F"/>
+      <ellipse cx="38" cy="75" rx="5.5" ry="4.5" fill="#17140F"/>
+      <ellipse cx="50" cy="72" rx="11" ry="9.5" fill="#17140F"/>
+      <path d="M77 62 L88 66 L77 71 Z" fill="#17140F"/>
+      <circle cx="68" cy="67" r="10.5" fill="#17140F"/>
+      <circle cx="71" cy="63.5" r="3" fill="#F4EFE6"/>
+    </g></g>
+  </svg><span class="n">Downright</span></div>
+    <h1>No network.<br>No tracking.<br><span class="hl">No exceptions.</span></h1>
+    <div class="sub">The code contains zero network calls — verified by an automated audit
+      on every release — and the source is public on GitHub so you can check.</div>
   </div>
+  <div class="list">
+      <div class="card item">
+        <div class="ic mono">01</div>
+        <div>
+          <b>Can’t read pages in the background</b>
+          <span>No host permissions. Downright only sees a page at the moment you press the shortcut or click the button — never before, never after.</span>
+        </div>
+      </div>
+      <div class="card item">
+        <div class="ic mono">02</div>
+        <div>
+          <b>Everything happens on your machine</b>
+          <span>Conversion, token estimates, downloads — all local. Nothing you clip ever leaves this browser.</span>
+        </div>
+      </div>
+      <div class="card item">
+        <div class="ic mono">03</div>
+        <div>
+          <b>Four small permissions, in plain words</b>
+          <span>Run on the tab you invoke it on · write to your clipboard · remember your settings · add the right-click menu. That’s the whole list.</span>
+        </div>
+      </div>
+  </div>
+</div>
 </body>
 </html>

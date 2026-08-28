@@ -1,55 +1,72 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="scene-shared.css">
-  <style>
-    .stage { flex-direction: column; gap: 28px; align-items: flex-start; }
-    .stage h1 { font-size: 40px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; width: 100%; }
-    .cell { padding: 20px 22px; }
-    .cell h3 { font-size: 16px; margin-bottom: 10px; color: #F4EFE6; }
-    .cell p { font-size: 13.5px; color: #9C9384; margin-bottom: 12px; }
-    .cell pre { font-size: 13px; line-height: 1.6; color: #CFC7B7; }
-  </style>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #17140F; color: #F4EFE6;
+         font-family: "Bricolage Grotesque", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .stage { width: 1280px; height: 800px; display: flex; overflow: hidden; }
+  .hl { color: #6E92D8; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  .brandline { display: flex; align-items: center; gap: 14px; }
+  .brandline .n { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .card { background: #211D16; border: 1px solid #342F26; border-radius: 14px; }
+  pre { margin: 0; }
+  .stage { flex-direction: column; gap: 28px; padding: 52px 64px; }
+  h1 { margin: 0; font-size: 54px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; flex: 1; }
+  .cell { padding: 24px 28px; }
+  .cell h3 { margin: 0 0 8px; font-size: 22px; font-weight: 700; }
+  .cell p { margin: 0 0 14px; font-size: 17px; color: #9C9384; line-height: 1.45; }
+  .cell pre { font-family: "IBM Plex Mono", monospace; font-size: 15.5px; line-height: 1.55;
+              color: #CFC7B7; }
+  .acc { color: #DA8A5C; }
+  .lk { color: #6E92D8; }
+  .ck { color: #6E92D8; }
+  .checks { line-height: 1.7 !important; }
+</style>
 </head>
 <body>
-  <div class="stage">
-    <h1>Code keeps its language.<br><span class="hl">Math keeps its LaTeX.</span></h1>
-    <div class="grid">
-      <div class="card cell">
-        <h3>Fenced with the right language</h3>
-        <p>Inferred from Prism, Shiki, and highlight.js markup — even line-number gutters are stripped.</p>
-        <pre class="mono"><span class="tok-code">```python
+<div class="stage">
+  <h1>Code keeps its language. <span class="hl">Math keeps its LaTeX.</span></h1>
+  <div class="grid">
+    <div class="card cell">
+      <h3>Fenced with the right language</h3>
+      <p>Inferred from Prism, Shiki, and highlight.js markup — even line-number gutters are stripped.</p>
+      <pre class="acc">```python
 def tf_idf(term, doc, corpus):
     tf = doc.count(term) / len(doc)
-    idf = log(N / df[term])
-    return tf * idf
-```</span></pre>
-      </div>
-      <div class="card cell">
-        <h3>KaTeX &amp; MathJax → real TeX</h3>
-        <p>Rendered equations come back as the LaTeX source, not garbled symbols.</p>
-        <pre class="mono"><span class="tok-math">$$
-\Delta v = v_e \ln \frac{m_0}{m_f}
+    return tf * log(N / df[term])
+```</pre>
+    </div>
+    <div class="card cell">
+      <h3>KaTeX &amp; MathJax → real TeX</h3>
+      <p>Rendered equations come back as the LaTeX source, not garbled symbols.</p>
+      <pre><span class="acc">$$
+\Delta v = v_e \ln (m_0 / m_f)
 $$</span>
 
-Inline too: <span class="tok-math">$E = mc^2$</span> stays intact.</pre>
-      </div>
-      <div class="card cell">
-        <h3>Links &amp; images made absolute</h3>
-        <p>Every relative URL is resolved, so clips work outside the page.</p>
-        <pre class="mono"><span class="tok-link">[the docs](https://example.org/docs/api)
-![diagram](https://example.org/img/flow.png)</span></pre>
-      </div>
-      <div class="card cell">
-        <h3>Works where others break</h3>
-        <p>Reads the rendered page — single-page apps, logged-in pages, and Shadow DOM all clip correctly.</p>
-        <pre class="mono">✓ React / Vue / SPA content
-✓ Web components (Shadow DOM)
-✓ Selection keeps list numbering</pre>
-      </div>
+Inline too: <span class="acc">$E = mc^2$</span> stays intact.</pre>
+    </div>
+    <div class="card cell">
+      <h3>Links &amp; images made absolute</h3>
+      <p>Every relative URL is resolved, so clips work outside the page.</p>
+      <pre class="lk">[the docs](https://example.org/docs/api)
+![diagram](https://example.org/img/flow.png)</pre>
+    </div>
+    <div class="card cell">
+      <h3>Works where others break</h3>
+      <p>Reads the rendered page — single-page apps, logged-in pages, and Shadow DOM all clip correctly.</p>
+      <pre class="checks"><span class="ck">✓</span> React / Vue / SPA content
+<span class="ck">✓</span> Web components (Shadow DOM)
+<span class="ck">✓</span> Selection keeps list numbering</pre>
     </div>
   </div>
+</div>
 </body>
 </html>

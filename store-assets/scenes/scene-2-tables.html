@@ -1,55 +1,70 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="scene-shared.css">
-  <style>
-    .stage { flex-direction: column; gap: 30px; align-items: flex-start; }
-    .stage h1 { font-size: 40px; }
-    .cols { display: flex; gap: 24px; width: 100%; align-items: stretch; }
-    .col { flex: 1; }
-    .col .label { font-size: 13px; font-weight: 700; text-transform: uppercase;
-                  letter-spacing: 0.06em; color: #9C9384; margin-bottom: 10px; }
-    .panel { padding: 18px; height: 340px; }
-    table { border-collapse: collapse; font-size: 14px; width: 100%; color: #CFC7B7; }
-    th, td { border: 1px solid #342F26; padding: 8px 12px; text-align: left; }
-    th { background: #17140F; }
-    .panel pre { font-size: 13.5px; line-height: 1.65; color: #CFC7B7; }
-    .arrow { font-size: 34px; color: #6E92D8; align-self: center; }
-    .footnote { color: #9C9384; font-size: 15.5px; margin-top: 4px; }
-  </style>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #17140F; color: #F4EFE6;
+         font-family: "Bricolage Grotesque", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .stage { width: 1280px; height: 800px; display: flex; overflow: hidden; }
+  .hl { color: #6E92D8; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  .brandline { display: flex; align-items: center; gap: 14px; }
+  .brandline .n { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .card { background: #211D16; border: 1px solid #342F26; border-radius: 14px; }
+  pre { margin: 0; }
+  .stage { flex-direction: column; gap: 30px; padding: 56px 64px; }
+  h1 { margin: 0; font-size: 58px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
+  .footnote { font-size: 21px; line-height: 1.5; color: #9C9384; margin-top: 14px; max-width: 900px; }
+  .cols { display: flex; gap: 28px; flex: 1; align-items: stretch; }
+  .col { flex: 1; display: flex; flex-direction: column; }
+  .label { font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 500;
+           text-transform: uppercase; letter-spacing: 0.06em; color: #9C9384; margin-bottom: 14px; }
+  .panel { flex: 1; box-shadow: 0 30px 80px rgba(0,0,0,0.5); padding: 26px; }
+  table { border-collapse: collapse; font-size: 19px; width: 100%; color: #CFC7B7; }
+  th, td { border: 1px solid #342F26; padding: 13px 16px; text-align: left; }
+  th { background: #17140F; }
+  .arrow { align-self: center; font-size: 40px; color: #6E92D8; flex: none; }
+  .clip { display: flex; align-items: center; }
+  .clip pre { font-family: "IBM Plex Mono", monospace; font-size: 16.5px; line-height: 1.75;
+              color: #DA8A5C; }
+</style>
 </head>
 <body>
-  <div class="stage">
-    <div>
-      <h1>Tables survive the trip — <span class="hl">spans and all</span></h1>
-      <p class="footnote">Real GFM pipe tables out of real-world HTML: merged cells, alignment,
-      headers, pipes in content. The thing every other clipper gets wrong.</p>
-    </div>
-    <div class="cols">
-      <div class="col">
-        <div class="label">The page</div>
-        <div class="card panel">
-          <table>
-            <tr><th>Name</th><th colspan="2">Contact</th></tr>
-            <tr><td>Ada</td><td>ada@example.com</td><td rowspan="2">Shared line</td></tr>
-            <tr><td>Grace</td><td>grace@example.com</td></tr>
-            <tr><td>Edsger</td><td>ew@example.com</td><td>Direct line</td></tr>
-          </table>
-        </div>
+<div class="stage">
+  <div>
+    <h1>Tables survive the trip — <span class="hl">spans and all</span></h1>
+    <div class="footnote">Real GFM pipe tables out of real-world HTML: merged cells, alignment,
+      headers, pipes in content. The thing every other clipper gets wrong.</div>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <div class="label">The page</div>
+      <div class="card panel">
+        <table>
+          <tr><th>Name</th><th colspan="2">Contact</th></tr>
+          <tr><td>Ada</td><td>ada@example.com</td><td rowspan="2">Shared line</td></tr>
+          <tr><td>Grace</td><td>grace@example.com</td></tr>
+          <tr><td>Edsger</td><td>ew@example.com</td><td>Direct line</td></tr>
+        </table>
       </div>
-      <div class="arrow">→</div>
-      <div class="col">
-        <div class="label">Your clipboard</div>
-        <div class="card panel">
-          <pre class="mono"><span class="tok-tbl">| Name   | Contact           |             |
+    </div>
+    <div class="arrow">→</div>
+    <div class="col">
+      <div class="label">Your clipboard</div>
+      <div class="card panel clip">
+        <pre>| Name   | Contact           |             |
 | ------ | ----------------- | ----------- |
 | Ada    | ada@example.com   | Shared line |
 | Grace  | grace@example.com |             |
-| Edsger | ew@example.com    | Direct line |</span></pre>
-        </div>
+| Edsger | ew@example.com    | Direct line |</pre>
       </div>
     </div>
   </div>
+</div>
 </body>
 </html>
