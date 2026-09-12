@@ -1,91 +1,627 @@
+/* Downright — the page that opens once, the moment the extension installs.
+ *
+ * Same house style as the settings page: a print shop. Warm paper, hard ink,
+ * one blue, and a monospace the instant the page shows you literal Markdown.
+ * The palette, the perforated rule, the medallion and the drawn controls are
+ * the settings page's, deliberately — the first screen a user sees should be
+ * the same object as the rest of the extension, not a cousin of it. */
+
+/* ------------------------------------------------------------------ *
+ * Palette — kept in step with options.css
+ * ------------------------------------------------------------------ */
 :root {
-  --bg: #EDE7DA;
-  --card: #F4EFE6;
+  --bg: #EAE3D5;
+  --card: #F7F3EA;
+  --sunken: #EFE9DC;
+  --border: #D5CCBA;
+  --hair: rgba(23, 20, 15, 0.09);
+
   --text: #17140F;
-  --muted: #6B6355;
-  --border: #CFC7B7;
+  --muted: #635C4E;
+  --faint: #8C8474;
+
   --accent: #2D5DAE;
+  --accent-soft: rgba(45, 93, 174, 0.10);
+  --accent-line: rgba(45, 93, 174, 0.34);
+  --on-accent: #F7F3EA;
+
+  --add: #2F6B45;
+  --add-bg: rgba(47, 107, 69, 0.11);
+
+  --bar-bg: rgba(234, 227, 213, 0.82);
+  --lift: 0 1px 2px rgba(23, 20, 15, 0.07);
+  --pop: 0 20px 46px rgba(23, 20, 15, 0.17), 0 2px 8px rgba(23, 20, 15, 0.07);
+  --medallion: #EDE7DA;
 }
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #17140F;
-    --card: #211D16;
+    --bg: #131109;
+    --card: #1F1B15;
+    --sunken: #17140F;
+    --border: #363025;
+    --hair: rgba(244, 239, 230, 0.09);
+
     --text: #F4EFE6;
-    --muted: #9C9384;
-    --border: #342F26;
+    --muted: #A29988;
+    --faint: #7C7466;
+
     --accent: #6E92D8;
+    --accent-soft: rgba(110, 146, 216, 0.14);
+    --accent-line: rgba(110, 146, 216, 0.42);
+    --on-accent: #14110B;
+
+    --add: #83C293;
+    --add-bg: rgba(131, 194, 147, 0.13);
+
+    --bar-bg: rgba(19, 17, 9, 0.82);
+    --lift: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --pop: 0 20px 46px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * Frame
+ * ------------------------------------------------------------------ */
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: var(--text);
   background: var(--bg);
+  color: var(--text);
+  font: 400 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-main { max-width: 620px; margin: 48px auto; padding: 0 24px 64px; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
-.logo { display: block; margin-bottom: 12px; border-radius: 14px; }
-
-h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.02em; }
-.tagline { color: var(--muted); margin: 0 0 28px; font-size: 16px; }
-
-.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 24px; }
-.steps li {
-  counter-increment: step;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px 14px 52px;
-  margin-bottom: 10px;
-  position: relative;
+code, kbd, .md, .chips li, .codebox {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
-.steps li::before {
-  content: counter(step);
-  position: absolute;
-  left: 16px;
-  top: 14px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+
+code {
+  font-size: 0.885em;
+  background: var(--sunken);
+  border: 1px solid var(--hair);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sec-h {
+  font-size: 12px;
   font-weight: 700;
-  font-size: 13px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin: 0 0 14px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Top bar — the perforated rule is the same one on the store tile.
+ * ------------------------------------------------------------------ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--bar-bg);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar::before {
+  content: "";
+  display: block;
+  height: 5px;
+  background: repeating-linear-gradient(90deg,
+    var(--text) 0 6px, transparent 6px 12px);
+  opacity: 0.85;
+}
+.topbar-in {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 11px 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 11px;
 }
-.steps strong { display: block; margin-bottom: 2px; }
-.steps span { color: var(--muted); font-size: 14px; }
+
+.mark {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--medallion);
+  border: 1px solid rgba(23, 20, 15, 0.16);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.mark svg { width: 28px; height: 28px; display: block; }
+
+.wordmark { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.wordmark b { font-size: 16px; font-weight: 700; letter-spacing: -0.015em; }
+.wordmark i {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+.wordmark i::before { content: "/ "; opacity: 0.6; }
+
+.ver {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+
+/* ------------------------------------------------------------------ *
+ * Shell
+ * ------------------------------------------------------------------ */
+.shell {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 44px 24px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Hero
+ * ------------------------------------------------------------------ */
+.hero h1 {
+  margin: 0 0 12px;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.033em;
+}
+.lede {
+  margin: 0 0 26px;
+  max-width: 62ch;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.lede em { font-style: normal; color: var(--accent); font-weight: 600; }
+
+/* The one thing we want them to do, given its own slab of paper. */
+.launch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: var(--lift);
+}
+
+/* Both platforms, side by side. Which one the reader needs is obvious to
+ * them and not reliably knowable to us at install time — Chrome reports an
+ * empty binding for a beat after onInstalled fires, which is exactly when
+ * this tab opens. So the page states the documented defaults and only
+ * overrides them when it finds a shortcut that is genuinely custom. */
+.launch-key {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  min-width: 0;
+}
+.kgroup { display: inline-flex; align-items: center; gap: 9px; }
+.kplat { font-size: 12.5px; color: var(--faint); letter-spacing: 0.01em; }
+.kdot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.launch-say {
+  grid-column: 1;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.launch-do {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.keys { flex: none; display: inline-flex; gap: 5px; align-items: center; }
 
 kbd {
-  font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: var(--bg);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card);
   border: 1px solid var(--border);
   border-bottom-width: 2px;
-  border-radius: 5px;
-  padding: 1px 6px;
+  border-radius: 7px;
+  padding: 7px 12px;
+  box-shadow: var(--lift);
 }
-code {
-  font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: var(--bg);
+.keys.sm kbd { font-size: 11.5px; padding: 2px 6px; border-radius: 5px; box-shadow: none; }
+
+.btn {
+  font: 600 13px/1 inherit;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0 4px;
+  border-radius: 9px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.btn:hover { background: var(--sunken); border-color: var(--faint); }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
+
+/* Shown only when opening the shortcuts page is refused, which some
+ * builds do — then the address has to be typed, so we print it. */
+.launch-help {
+  margin: 10px 2px 0;
+  font-size: 12.5px;
+  color: var(--muted);
 }
 
-.promise {
+/* ------------------------------------------------------------------ *
+ * The proof — page on the left, clipboard on the right
+ * ------------------------------------------------------------------ */
+.panes {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 0 14px;
+}
+
+.pane {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--lift);
+}
+.pane-h {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--sunken);
+}
+.pane-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.pane-body { padding: 16px 18px; flex: 1; min-width: 0; overflow-x: auto; }
+
+/* The left pane pretends to be an article, so the contrast with the right
+ * pane is the contrast a user actually experiences. */
+.article h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.article p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+.article a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 12px;
+  font-size: 12.5px;
+}
+.article th, .article td {
+  border: 1px solid var(--border);
+  padding: 5px 9px;
+  text-align: left;
+}
+.article th { background: var(--sunken); font-weight: 700; }
+.article td { color: var(--muted); }
+
+.codebox {
+  position: relative;
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 9px 11px;
+  font-size: 12px;
+}
+.codebox-lang {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.codebox pre { margin: 0; line-height: 1.7; color: var(--text); }
+/* The line-number gutter Downright strips back out. */
+.codebox .n {
+  display: inline-block;
+  width: 16px;
+  color: var(--faint);
+  user-select: none;
+}
+.codebox .num { color: var(--accent); }
+
+/* The seam between the panes: perforation, arrow, perforation. */
+.pane-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+.pane-arrow .perf {
+  flex: 1;
+  width: 5px;
+  background: repeating-linear-gradient(180deg,
+    var(--text) 0 6px, transparent 6px 12px);
+  opacity: 0.28;
+}
+.pane-arrow-glyph {
+  font-size: 17px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.md {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre;
+}
+.md-h { color: var(--accent); font-weight: 700; }
+.md-em { color: var(--text); }
+.md-url { color: var(--faint); }
+.md-tbl { color: var(--muted); }
+.md-fence { color: var(--add); }
+
+.chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.chips li {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: 999px;
+  padding: 4px 11px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Three ways in
+ * ------------------------------------------------------------------ */
+.way-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.way {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--lift);
+}
+.way-ico {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.way-ico svg { width: 17px; height: 17px; display: block; }
+.way h3 {
+  margin: 0 0 5px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+.way p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.way b { color: var(--text); font-weight: 600; }
+
+/* ------------------------------------------------------------------ *
+ * The toast, mounted live from common/toast.js
+ * ------------------------------------------------------------------ */
+.told {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: var(--lift);
+}
+.told-copy { min-width: 0; }
+.told-copy p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+.told-fine { margin-top: 8px !important; font-size: 12.5px !important; color: var(--faint) !important; }
+
+/* A scrap of page for the toast to sit on, so it reads as an overlay
+ * rather than as part of this card. */
+.told-stage {
+  flex: none;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--sunken);
+  border: 1px solid var(--hair);
+  background-image: repeating-linear-gradient(180deg,
+    var(--hair) 0 1px, transparent 1px 9px);
+}
+
+/* ------------------------------------------------------------------ *
+ * The trust story
+ * ------------------------------------------------------------------ */
+.trust {
   background: var(--card);
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
-  border-radius: 12px;
-  padding: 16px 18px;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: var(--lift);
 }
-.promise h2 { font-size: 15px; margin: 0 0 6px; }
-.promise p { margin: 0; color: var(--muted); font-size: 14px; }
+.trust-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.trust-ico {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--accent);
+}
+.trust-ico svg { width: 15px; height: 15px; display: block; }
 
-.fine { color: var(--muted); font-size: 13px; margin-top: 20px; }
+.trust-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 13px 28px;
+}
+.trust-list li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.trust-list b { color: var(--text); font-weight: 600; }
+.trust-list .ico {
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  flex: none;
+  color: var(--add);
+}
+
+.trust-perms {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+/* ------------------------------------------------------------------ *
+ * Foot
+ * ------------------------------------------------------------------ */
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair);
+}
+.foot-mark {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--medallion);
+  border: 1px solid rgba(23, 20, 15, 0.16);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  opacity: 0.85;
+}
+.foot-mark svg { width: 19px; height: 19px; display: block; }
+.foot p { margin: 0; font-size: 12.5px; color: var(--faint); }
+.foot-link { margin-left: auto; font-size: 12.5px; color: var(--muted); }
+.foot-link:hover { color: var(--accent); }
+
+/* ------------------------------------------------------------------ *
+ * Narrow windows — the install tab is often opened beside something else
+ * ------------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .hero h1 { font-size: 34px; }
+  .lede { font-size: 15.5px; }
+  .panes { grid-template-columns: 1fr; gap: 12px 0; }
+  .pane-arrow { flex-direction: row; padding: 0; gap: 10px; }
+  .pane-arrow .perf {
+    height: 5px;
+    width: auto;
+    background: repeating-linear-gradient(90deg,
+      var(--text) 0 6px, transparent 6px 12px);
+  }
+  .pane-arrow-glyph { transform: rotate(90deg); }
+  .told { grid-template-columns: 1fr; }
+}
+
+/* Once the two keycap groups stop fitting on one line the dot between them
+ * strands at the end of a row, and the buttons have nowhere sensible to sit
+ * beside them — so the slab goes to a single column. */
+@media (max-width: 700px) {
+  .launch { grid-template-columns: minmax(0, 1fr); }
+  .launch-do { grid-column: 1; grid-row: auto; }
+  .kdot { display: none; }
+  .launch-key { gap: 9px 14px; }
+}
+
+@media (max-width: 560px) {
+  .shell { padding: 30px 16px 40px; gap: 34px; }
+  .topbar-in { padding: 11px 16px; }
+  .hero h1 { font-size: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,43 +1,280 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Welcome to Downright</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Downright is ready</title>
   <link rel="stylesheet" href="welcome.css">
 </head>
 <body>
-  <main>
-    <img src="../icons/icon-128.png" alt="" width="64" height="64" class="logo">
-    <h1>Downright is ready</h1>
-    <p class="tagline">Any page → downright correct Markdown, on your clipboard.</p>
 
-    <ol class="steps">
-      <li>
-        <strong>Press <kbd>Alt</kbd>+<kbd>M</kbd></strong>
-        <span>(<kbd>Option</kbd>+<kbd>M</kbd> on Mac) on any page — the article lands on your
-        clipboard as clean Markdown, ready to paste into ChatGPT, Claude, Obsidian, or a doc.</span>
-      </li>
-      <li>
-        <strong>Select text first</strong>
-        <span>and the same keystroke — or right-click → “Copy selection as Markdown” — clips
-        just the selection, keeping lists, tables, and code intact.</span>
-      </li>
-      <li>
-        <strong>Click the toolbar icon</strong>
-        <span>to preview the Markdown before copying, switch between Article and Full-page
-        capture, or save the clip as a <code>.md</code> file.</span>
-      </li>
-    </ol>
+<!-- Drawn once, referenced everywhere — the same sprite the settings page
+     carries. The mark is the leafcutter hauling a sheet of Markdown; the
+     middle bar is blue because that is where a link lands. -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-mark" viewBox="0 0 100 100">
+    <g transform="rotate(-13 55 27)">
+      <rect x="24" y="4" width="62" height="44" fill="#F4EFE6" stroke="#17140F" stroke-width="4"/>
+      <rect x="32" y="13" width="26" height="3.8" fill="#17140F"/>
+      <rect x="32" y="23" width="46" height="3.8" fill="#2D5DAE"/>
+      <rect x="32" y="33" width="34" height="3.8" fill="#17140F"/>
+    </g>
+    <path d="M60 58 L54 45 M72 57 L79 45" stroke="#17140F" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+    <path d="M36 84 L26 95 M48 82 L46 97 M58 80 L68 94" stroke="#17140F" stroke-width="4.4" stroke-linecap="round" fill="none"/>
+    <ellipse cx="24" cy="76" rx="16" ry="12.5" transform="rotate(-8 24 76)" fill="#17140F"/>
+    <ellipse cx="38" cy="75" rx="5.5" ry="4.5" fill="#17140F"/>
+    <ellipse cx="50" cy="72" rx="11" ry="9.5" fill="#17140F"/>
+    <path d="M77 62 L88 66 L77 71 Z" fill="#17140F"/>
+    <circle cx="68" cy="67" r="10.5" fill="#17140F"/>
+    <circle cx="71" cy="63.5" r="3" fill="#F4EFE6"/>
+  </symbol>
+  <symbol id="i-tick" viewBox="0 0 14 14">
+    <path d="M2.4 7.3 L5.5 10.4 L11.6 3.6" fill="none" stroke="currentColor"
+          stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="i-key" viewBox="0 0 16 16">
+    <rect x="1.1" y="3.4" width="13.8" height="9.2" rx="2.2" fill="none"
+          stroke="currentColor" stroke-width="1.4"/>
+    <path d="M4.4 6.6h.01M7 6.6h.01M9.6 6.6h.01M4.4 9.4h7.2" fill="none"
+          stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-select" viewBox="0 0 16 16">
+    <path d="M2.2 2.2h4M9.8 2.2h4M13.8 2.2v4M13.8 9.8v4M13.8 13.8h-4M6.2 13.8h-4M2.2 13.8v-4M2.2 6.2v-4"
+          fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M5.4 5.4h5.2M5.4 8h5.2M5.4 10.6h3" fill="none" stroke="currentColor"
+          stroke-width="1.4" stroke-linecap="round" opacity="0.55"/>
+  </symbol>
+  <symbol id="i-window" viewBox="0 0 16 16">
+    <rect x="1.4" y="2.4" width="13.2" height="11.2" rx="2" fill="none"
+          stroke="currentColor" stroke-width="1.4"/>
+    <path d="M1.4 5.8h13.2" fill="none" stroke="currentColor" stroke-width="1.4"/>
+    <circle cx="3.9" cy="4.1" r="0.7" fill="currentColor"/>
+    <path d="M4.2 8.4h7.6M4.2 11h4.8" fill="none" stroke="currentColor"
+          stroke-width="1.4" stroke-linecap="round" opacity="0.55"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 16 16">
+    <path d="M8 1.4 13.6 3.6v4.1c0 3.2-2.3 5.6-5.6 6.9-3.3-1.3-5.6-3.7-5.6-6.9V3.6Z"
+          fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M5.5 7.9 7.3 9.7l3.3-3.6" fill="none" stroke="currentColor"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
 
-    <div class="promise">
-      <h2>The Downright promise</h2>
-      <p>Tables come out as real tables. Code fences keep their language. LaTeX survives.
-      Links and images become absolute URLs. And none of it ever leaves your browser —
-      Downright makes <strong>no network requests, ever</strong>, and can’t read any page
-      until the moment you invoke it.</p>
+<header class="topbar">
+  <div class="topbar-in">
+    <span class="mark"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-mark"/></svg></span>
+    <span class="wordmark">
+      <b>Downright</b>
+      <i>Welcome</i>
+    </span>
+    <span class="ver" id="version"></span>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- ------------------------------------------------------------------ *
+       Hero — the headline, and the one key that does the work. The keycaps
+       are filled in by welcome.js from commands.getAll(), so the page shows
+       the shortcut this browser actually bound rather than the one we hoped
+       for. Alt+M is the markup fallback for the moment before that lands.
+       ------------------------------------------------------------------ -->
+  <section class="hero">
+    <h1>Downright is ready.</h1>
+    <p class="lede">
+      Any page → <em>downright correct</em> Markdown, on your clipboard. Tables stay
+      tables, code keeps its language, LaTeX survives — and none of it ever leaves
+      your browser.
+    </p>
+
+    <div class="launch">
+      <div class="launch-key" id="shortcut-keys">
+        <span class="kgroup">
+          <span class="keys"><kbd>⌥</kbd><kbd>M</kbd></span>
+          <span class="kplat">on Mac</span>
+        </span>
+        <span class="kdot" aria-hidden="true"></span>
+        <span class="kgroup">
+          <span class="keys"><kbd>Alt</kbd><kbd>M</kbd></span>
+          <span class="kplat">on Windows &amp; Linux</span>
+        </span>
+      </div>
+      <p class="launch-say" id="shortcut-say">copies the page you are reading — or just the
+        text you have selected</p>
+      <div class="launch-do">
+        <button type="button" class="btn primary" id="open-settings">Open settings</button>
+        <button type="button" class="btn" id="open-shortcuts">Change shortcut</button>
+      </div>
+    </div>
+    <p class="launch-help" id="shortcut-help" hidden></p>
+  </section>
+
+  <!-- ------------------------------------------------------------------ *
+       The proof. Everything else on this page is a claim; this is the
+       claim rendered next to its result. The left pane is ordinary page
+       markup styled like an article, the right is the Markdown it becomes
+       — written out by hand here, and matched against the converter by
+       tests/pages so the two cannot quietly drift apart.
+       ------------------------------------------------------------------ -->
+  <section class="proof" aria-labelledby="proof-h">
+    <h2 id="proof-h" class="sec-h">What one keystroke does</h2>
+
+    <div class="panes">
+      <figure class="pane">
+        <figcaption class="pane-h"><span class="pane-tag">On the page</span></figcaption>
+        <div class="pane-body article">
+          <h3>Foraging efficiency</h3>
+          <p>Workers of <a href="#demo"><em>Atta cephalotes</em></a> carry fragments many
+             times their own mass, and the colony trades speed against load.</p>
+          <table>
+            <thead><tr><th>Species</th><th>Load</th><th>Speed</th></tr></thead>
+            <tbody>
+              <tr><td>A. cephalotes</td><td>73 mg</td><td>2.4 cm/s</td></tr>
+              <tr><td>A. sexdens</td><td>61 mg</td><td>3.1 cm/s</td></tr>
+            </tbody>
+          </table>
+          <div class="codebox">
+            <span class="codebox-lang">python</span>
+            <pre><span class="n">1</span>load = mass * <span class="num">12.4</span>
+<span class="n">2</span>speed = base / load</pre>
+          </div>
+        </div>
+      </figure>
+
+      <div class="pane-arrow" aria-hidden="true">
+        <span class="perf"></span>
+        <span class="pane-arrow-glyph">→</span>
+        <span class="perf"></span>
+      </div>
+
+      <figure class="pane">
+        <figcaption class="pane-h"><span class="pane-tag">On your clipboard</span></figcaption>
+        <div class="pane-body">
+<pre class="md"><span class="md-h">## Foraging efficiency</span>
+
+Workers of [<span class="md-em">*Atta cephalotes*</span>](<span class="md-url">https://example.org/atta</span>)
+carry fragments many times their own mass, and the
+colony trades speed against load.
+
+<span class="md-tbl">| Species       | Load  | Speed    |
+| ------------- | ----- | -------- |
+| A. cephalotes | 73 mg | 2.4 cm/s |
+| A. sexdens    | 61 mg | 3.1 cm/s |</span>
+
+<span class="md-fence">```python</span>
+load = mass * 12.4
+speed = base / load
+<span class="md-fence">```</span></pre>
+        </div>
+      </figure>
     </div>
 
-    <p class="fine">Change the shortcut or defaults any time in the extension’s settings.</p>
-  </main>
+    <ul class="chips">
+      <li>Real GFM tables</li>
+      <li>Language-tagged fences</li>
+      <li>KaTeX &amp; MathJax → LaTeX</li>
+      <li>Absolute URLs</li>
+      <li>Shadow DOM</li>
+      <li>Rendered SPAs</li>
+    </ul>
+  </section>
+
+  <!-- ------------------------------------------------------------------ *
+       Three ways in, as a row rather than a stack — they are alternatives,
+       not sequential steps, and the old numbered list implied an order
+       that does not exist.
+       ------------------------------------------------------------------ -->
+  <section class="ways" aria-labelledby="ways-h">
+    <h2 id="ways-h" class="sec-h">Three ways to clip</h2>
+    <div class="way-grid">
+      <article class="way">
+        <span class="way-ico"><svg aria-hidden="true"><use href="#i-key"/></svg></span>
+        <h3>The keystroke</h3>
+        <p>Press <span class="keys sm" id="shortcut-keys-2"><kbd>Alt</kbd><kbd>M</kbd></span>
+           anywhere. The article lands on your clipboard, ready to paste into ChatGPT,
+           Claude, Obsidian, or a doc.</p>
+      </article>
+      <article class="way">
+        <span class="way-ico"><svg aria-hidden="true"><use href="#i-select"/></svg></span>
+        <h3>A selection</h3>
+        <p>Select text first and the same keystroke — or right-click →
+           <b>Copy selection as Markdown</b> — clips just that, keeping list numbering,
+           table headers, and fences intact.</p>
+      </article>
+      <article class="way">
+        <span class="way-ico"><svg aria-hidden="true"><use href="#i-window"/></svg></span>
+        <h3>The popup</h3>
+        <p>Click the toolbar icon to read the Markdown before you copy it, switch
+           Article ↔ Full page, check the token estimate, or save it as a
+           <code>.md</code> file.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------------ *
+       The toast, mounted live. This is the real component out of
+       common/toast.js — the same one the content script raises on a page
+       and the settings page previews — so what a new user is shown here is
+       necessarily what they will get.
+       ------------------------------------------------------------------ -->
+  <section class="told" aria-labelledby="told-h">
+    <div class="told-copy">
+      <h2 id="told-h" class="sec-h">You always find out what happened</h2>
+      <p>Every clip raises this in the corner of the page: the leafcutter hauling it in
+         with the token count, or a still mark and the reason it could not. Pages
+         extensions are not allowed to run on — browser settings, the add-on stores, the
+         PDF viewer — say so by name instead of failing silently.</p>
+      <p class="told-fine">Prefer it quiet? Turn the toast off in settings.</p>
+    </div>
+    <div class="told-stage" id="toast-stage" aria-hidden="true"></div>
+  </section>
+
+  <!-- ------------------------------------------------------------------ *
+       The trust story, as a checklist. It was a paragraph, which is the
+       wrong shape for a list of guarantees people scan for.
+       ------------------------------------------------------------------ -->
+  <section class="trust" aria-labelledby="trust-h">
+    <h2 id="trust-h" class="trust-h">
+      <span class="trust-ico"><svg aria-hidden="true"><use href="#i-shield"/></svg></span>
+      It never phones home
+    </h2>
+    <ul class="trust-list">
+      <li>
+        <svg class="ico" aria-hidden="true"><use href="#i-tick"/></svg>
+        <span><b>No network requests. Ever.</b> There is no <code>fetch</code>, no XHR and no
+          beacon anywhere in the code — checked mechanically in CI on every push.</span>
+      </li>
+      <li>
+        <svg class="ico" aria-hidden="true"><use href="#i-tick"/></svg>
+        <span><b>No host permissions.</b> Downright cannot read a page in the background. It
+          runs on the tab you invoke it on, at the moment you invoke it.</span>
+      </li>
+      <li>
+        <svg class="ico" aria-hidden="true"><use href="#i-tick"/></svg>
+        <span><b>Token counts are local.</b> Estimated as <code>≈ chars/4</code>,
+          CJK-weighted. No tokenizer ever gets called.</span>
+      </li>
+      <li>
+        <svg class="ico" aria-hidden="true"><use href="#i-tick"/></svg>
+        <span><b>Hidden text is dropped.</b> Off-screen and <code>sr-only</code> content, and
+          invisible Unicode carriers, are stripped — nothing rides into your chat unseen.</span>
+      </li>
+    </ul>
+    <p class="trust-perms">The whole permission list: <code>activeTab</code>,
+      <code>scripting</code>, <code>clipboardWrite</code>, <code>storage</code>,
+      <code>contextMenus</code>.</p>
+  </section>
+
+  <footer class="foot">
+    <span class="foot-mark"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-mark"/></svg></span>
+    <p>Change the shortcut, the front matter, or the filename template any time.</p>
+    <a class="foot-link" href="https://github.com/jayasankarmr/Downright">Source &amp; issues</a>
+  </footer>
+
+</main>
+
+<script src="../common/toast.js"></script>
+<script src="welcome.js"></script>
 </body>
 </html>
