@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.2 — 13 September 2026
+
+- **The welcome page is rebuilt on the house system.** The screen that opens the moment
+  Downright installs was the one surface that did not look like the rest of it: its own
+  thinner palette, the icon PNG rasterised and rounded off with a `border-radius`, and
+  three identical numbered cards implying an order between what are really alternatives.
+  It now carries the settings page's tokens, its perforated rule, its medallion and the
+  drawn leafcutter mark, and it shows the work rather than describing it — an article
+  beside the Markdown it becomes, and the real `common/toast.js` component mounted live
+  rather than a drawing of one.
+- **The install screen no longer claims the shortcut is unassigned.** Chrome reports
+  `clip-copy` with an empty `shortcut` for a moment after `onInstalled` fires — exactly
+  when that tab opens — so every new user was greeted with "No shortcut assigned" until
+  something else caused a reread. The page now states both documented defaults, `⌥M` on
+  Mac and `Alt+M` on Windows and Linux, and only overrides them when a genuinely custom
+  binding exists.
+- Its two buttons reach the settings page and the browser's own shortcuts screen, neither
+  of which a plain link can follow, and the trust story is a checklist instead of a
+  paragraph.
+
+No functional changes — conversion, permissions, and the zero-network guarantee are
+untouched.
+
 ## 1.0.1 — 28 August 2026
 
 - **New store screenshots and promo tile**: larger type, content filling the frame, and
