@@ -24,15 +24,15 @@ if [ -z "$CHROME" ]; then
   exit 2
 fi
 
-shot() { # file.html out.png WxH
-  local page="$1" out="$2" size="$3"
+shot() { # file.html out.png WxH [extra chrome flags...]
+  local page="$1" out="$2" size="$3"; shift 3
   # --virtual-time-budget lets the promo-tile scenes finish loading their
   # Google Fonts before the screenshot fires; render offline and the type
   # falls back to system fonts.
   "$CHROME" --headless=new --disable-gpu --no-sandbox --no-first-run \
     --hide-scrollbars --force-device-scale-factor=1 \
     --virtual-time-budget=10000 \
-    --window-size="${size/x/,}" --screenshot="$out" \
+    --window-size="${size/x/,}" --screenshot="$out" "$@" \
     "file://$ROOT/store-assets/scenes/$page" 2>/dev/null
   echo "  $out"
 }
@@ -44,4 +44,8 @@ shot scene-3-fidelity.html       "$OUT/screenshot-3-fidelity.png"    1280x800
 shot scene-4-private.html        "$OUT/screenshot-4-private.png"     1280x800
 shot scene-promo-tile.html       "$OUT/promo-tile-440x280.png"       440x280
 shot scene-promo-tile-dark.html  "$OUT/promo-tile-440x280-dark.png"  440x280
+# The Chrome Web Store icon keeps its 16px padding transparent, so this one
+# renders on an empty background instead of Chrome's default white.
+shot scene-store-icon.html       "$OUT/store-icon-128.png"           128x128 \
+  --default-background-color=00000000
 echo "done"
