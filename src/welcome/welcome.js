@@ -3,9 +3,9 @@
  * The page is readable with the script disabled; everything here replaces a
  * hard-coded fallback with the truth about this particular install:
  *
- *   · the keycaps show the shortcut the browser actually bound, which is not
- *     always Alt+M — Chrome hands out only four command slots, and the user
- *     may have rebound it before ever opening this tab;
+ *   · the hero states both documented defaults, and the keycaps are swapped
+ *     for a custom binding if one is found. See loadShortcut() for why it
+ *     is written the way round it is;
  *   · the toast is the real component out of common/toast.js, mounted the
  *     same way the settings page mounts it, so this preview cannot drift
  *     from what a clip puts on the page;
@@ -29,47 +29,72 @@ const SHORTCUT_URL = IS_FIREFOX ? 'about:addons' : 'chrome://extensions/shortcut
 /* ------------------------------------------------------------------ *
  * Keycaps
  *
- * Two places show the shortcut — the hero slab and the first of the three
- * ways in — and both are filled from one read, so they cannot disagree.
+ * The hero lists both documented defaults in the markup — ⌥M and Alt+M —
+ * because a reader who has just installed this needs to know which key to
+ * press, and the page cannot ask them which machine they are on. The one
+ * in the "three ways" card is the platform's own, since a sentence reads
+ * badly with two shortcuts wedged into it.
  * ------------------------------------------------------------------ */
+
+const DEFAULT_COMBO = 'Alt+M';
+
+function keycaps(combo) {
+  const box = document.createElement('span');
+  box.className = 'keys';
+  for (const part of (combo || DEFAULT_COMBO).split('+')) {
+    const key = document.createElement('kbd');
+    key.textContent = IS_MAC && MAC_KEYS[part] ? MAC_KEYS[part] : part;
+    box.appendChild(key);
+  }
+  return box;
+}
 
 function renderKeys(box, combo) {
   if (!box) return;
   box.className = box.classList.contains('sm') ? 'keys sm' : 'keys';
   box.textContent = '';
-  for (const part of (combo || 'Alt+M').split('+')) {
+  for (const part of (combo || DEFAULT_COMBO).split('+')) {
     const key = document.createElement('kbd');
     key.textContent = IS_MAC && MAC_KEYS[part] ? MAC_KEYS[part] : part;
     box.appendChild(key);
   }
 }
 
-/* No slot was assigned. Saying so — and saying where to fix it — beats
- * printing a key that does nothing. */
-function renderUnset() {
-  const box = el('shortcut-keys');
-  if (box) {
-    box.className = 'keys unset';
-    box.textContent = 'No shortcut assigned';
+/* Something other than the default is bound, so listing the defaults would
+ * be a lie. Collapse the pair down to the one key that actually works. */
+function renderCustom(combo) {
+  const row = el('shortcut-keys');
+  if (row) {
+    row.textContent = '';
+    const group = document.createElement('span');
+    group.className = 'kgroup';
+    const plat = document.createElement('span');
+    plat.className = 'kplat';
+    plat.textContent = 'your shortcut';
+    group.append(keycaps(combo), plat);
+    row.appendChild(group);
   }
-  const say = el('shortcut-say');
-  if (say) say.textContent = 'assign one below, then press it on any page';
-  renderKeys(el('shortcut-keys-2'), 'Alt+M');
+  renderKeys(el('shortcut-keys-2'), combo);
 }
 
+/* Note the shape: this only ever *overrides* the markup.
+ *
+ * Chrome reports clip-copy with an empty `shortcut` for a moment after
+ * onInstalled fires — which is precisely when this tab is opened — and an
+ * earlier version believed it and announced "No shortcut assigned" to every
+ * new user, correcting itself only once something else triggered a reread.
+ * An empty binding here is far more likely to be that race than a browser
+ * that genuinely refused the key, and the documented defaults are the safer
+ * thing to leave on screen either way. The "Change shortcut" button covers
+ * the rare install where the key really did not take. */
 async function loadShortcut() {
+  renderKeys(el('shortcut-keys-2'), DEFAULT_COMBO);
   try {
     const commands = await api.commands.getAll();
     const copy = (commands || []).filter((c) => c.name === 'clip-copy')[0];
-    if (copy && copy.shortcut) {
-      renderKeys(el('shortcut-keys'), copy.shortcut);
-      renderKeys(el('shortcut-keys-2'), copy.shortcut);
-      return;
-    }
-    if (copy) { renderUnset(); return; }
-  } catch (e) { /* fall through to the documented default */ }
-  renderKeys(el('shortcut-keys'), 'Alt+M');
-  renderKeys(el('shortcut-keys-2'), 'Alt+M');
+    const combo = copy && copy.shortcut;
+    if (combo && combo !== DEFAULT_COMBO) renderCustom(combo);
+  } catch (e) { /* the markup already says the right thing */ }
 }
 
 /* ------------------------------------------------------------------ *
